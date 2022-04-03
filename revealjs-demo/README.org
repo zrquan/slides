@@ -1,0 +1,3 @@
+#+TITLE: reveal.js demo
+
+用 [[https://github.com/emacsmirror/org-re-reveal][org-re-reveal]] 模仿制作 reveal.js 的官方示例

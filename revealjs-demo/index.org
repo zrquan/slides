@@ -1,0 +1,383 @@
+# -*- org-re-reveal-title-slide: "./title-slide.html"; -*-
+
+#+TITLE: reveal.js demo
+#+AUTHOR: 4shen0ne
+#+SUBTITLE: 基于 Web 的幻灯片框架
+
+#+REVEAL_ROOT: ../reveal.js
+#+OPTIONS: toc:nil num:nil reveal_slide_number:nil
+#+REVEAL_MIN_SCALE: 0.2
+#+REVEAL_MAX_SCALE: 2.0
+#+REVEAL_TRANS: slide
+#+REVEAL_EXTRA_CSS: ../style.css
+#+REVEAL_EXTRA_SCRIPTS: ("../script.js")
+#+REVEAL_PLUGINS: (zoom notes highlight)
+
+* 什么是 reveal.js
+reveal.js 是一个用来制作幻灯片的前端框架，使用它可以很便捷地用 HTML 文档写出效果
+丰富、交互功能强大的幻灯片网页。本页面将展示 reveal.js 的一些基础效果，除此之外，
+借助自定义的 javascript 和 css 代码你可以实现更多功能
+
+#+begin_notes
+在启用了 notes 插件的情况下，按 s 可以打开演讲稿
+
+演讲稿窗口和幻灯片窗口分开展示，观众看不到演讲稿内容，但是通过设置可以在打印 pdf
+时包含演讲稿内容
+
+zoom 插件不会同时应用在两个窗口
+
+测试多行文本的展示情况
+
+测试多行文本的展示情况
+
+测试多行文本的展示情况
+
+测试多行文本的展示情况
+
+...
+#+end_notes
+
+* 垂直翻页
+不同的幻灯片页面可以嵌套展现
+
+按空格浏览垂直方向的所有幻灯片
+
+#+REVEAL_HTML: <a href="#" class="navigate-down enabled">
+#+attr_html: :class r-frame :style background:rgba(255,255,255,0.1); :width 178 :height 238 :alt Down arrow :data-lazy-loaded nil
+[[file:img/arrow.png]]
+#+REVEAL_HTML: </a>
+
+** 第一级子页
+页面嵌套可以很方便地组织文本内容的结构，比如用子页来详细说明顶层页面的主题
+
+** 第二级子页
+按方向键可以返回上层页面
+
+#+REVEAL_HTML: <a href="#" class="navigate-up enabled">
+#+attr_html: :class r-frame :style background:rgba(255,255,255,0.1);transform:rotate(180deg); :width 178 :height 238 :alt Up arrow :data-lazy-loaded nil
+[[file:img/arrow.png]]
+#+REVEAL_HTML: </a>
+
+* 在线编辑器
+如果你没有 Web 开发经验，可以通过这个网站在线制作幻灯片：[[https://slides.com]]
+
+* 代码块
+:PROPERTIES:
+:reveal_extra_attr: data-auto-animate
+:END:
+
+#+attr_reveal: :code_attribs data-line-numbers data-org-id="code-animation"
+#+begin_src javascript
+import React, { useState } from 'react';
+ 
+function Example() {
+  const [count, setCount] = useState(0);
+ 
+  return (
+    ...
+  );
+}
+#+end_src
+
+内置的 highlight 插件提供代码块高亮功能
+
+* 动画过渡
+:PROPERTIES:
+:reveal_extra_attr: data-auto-animate
+:END:
+
+#+attr_reveal: :code_attribs data-line-numbers="|4,8-11|17|22-24" data-org-id="code-animation"
+#+begin_src javascript
+import React, { useState } from 'react';
+ 
+function Example() {
+  const [count, setCount] = useState(0);
+ 
+  return (
+    <div>
+      <p>You clicked {count} times</p>
+      <button onClick={() => setCount(count + 1)}>
+        Click me
+      </button>
+    </div>
+  );
+}
+ 
+function SecondExample() {
+  const [count, setCount] = useState(0);
+ 
+  return (
+    <div>
+      <p>You clicked {count} times</p>
+      <button onClick={() => setCount(count + 1)}>
+        Click me
+      </button>
+    </div>
+  );
+}
+#+end_src
+
+* 视图
+按 Esc 可以切换大纲视图
+
+启用内置的 zoom 插件后，按住 Alt 然后用鼠标左键点击任意位置可以放大，再点击一次复原
+
+(Linux 系统按住 Ctrl 加鼠标左键)
+
+* Auto-Animate
+:PROPERTIES:
+:reveal_extra_attr: data-auto-animate
+:END:
+切换页面时，[[https://revealjs.com/auto-animate/][Auto-Animate]] 可以自动给匹配的 DOM 元素添加动画效果
+
+#+begin_export html
+<div class="r-hstack justify-center">
+<div data-id="box1" style="background: #999; width: 50px; height: 50px; margin: 10px; border-radius: 5px;"></div>
+<div data-id="box2" style="background: #999; width: 50px; height: 50px; margin: 10px; border-radius: 5px;"></div>
+<div data-id="box3" style="background: #999; width: 50px; height: 50px; margin: 10px; border-radius: 5px;"></div>
+</div>
+#+end_export
+
+* \nbsp
+:PROPERTIES:
+:reveal_extra_attr: data-auto-animate
+:UNNUMBERED: notoc
+:END:
+
+#+begin_export html
+<div class="r-hstack justify-center">
+<div data-id="box1" data-auto-animate-delay="0" style="background: cyan; width: 150px; height: 100px; margin: 10px;"></div>
+<div data-id="box2" data-auto-animate-delay="0.1" style="background: magenta; width: 150px; height: 100px; margin: 10px;"></div>
+<div data-id="box3" data-auto-animate-delay="0.2" style="background: yellow; width: 150px; height: 100px; margin: 10px;"></div>
+</div>
+<h2>AUTO-ANIMATE</h2>
+#+end_export
+
+* \nbsp
+:PROPERTIES:
+:reveal_extra_attr: data-auto-animate
+:UNNUMBERED: notoc
+:END:
+
+#+begin_export html
+<div class="r-stack">
+<div data-id="box1" style="background: cyan; width: 300px; height: 300px; border-radius: 200px;"></div>
+<div data-id="box2" style="background: magenta; width: 200px; height: 200px; border-radius: 200px;"></div>
+<div data-id="box3" style="background: yellow; width: 100px; height: 100px; border-radius: 200px;"></div>
+</div>
+<h2>AUTO-ANIMATE</h2>
+#+end_export
+
+* 触屏设备优化
+reveal.js 对手机和平板等移动设备也做了优化，试试打开开发者工具切换到移动设备，然
+后用鼠标划动幻灯片
+
+* Markdown 支持
+可以使用 Markdown 语法编写幻灯片的内容，详情参考 [[https://revealjs.com/markdown/][readme]] 文档
+
+#+begin_src html
+<section data-markdown>
+  ## Markdown support
+ 
+  Write content using inline or external Markdown.
+  Instructions and more info available in the [readme](https://revealjs.com/markdown/).
+</section>
+#+end_src
+
+* \nbsp
+:PROPERTIES:
+:UNNUMBERED: notoc
+:END:
+
+r-fit-text 类可以自动适应文本尺寸
+
+#+HTML: <p class="r-fit-text">FIT TEXT</p>
+
+* 片段
+向下翻页👇
+
+#+ATTR_REVEAL: :frag t
+继续翻页试试😁
+
+#+begin_export html
+<p>
+<span class="fragment">不同的</span><span class="fragment">片段</span><span class="fragment">相继展示</span>
+</p>
+#+end_export
+
+** 片段样式
+不同的片段可以设置特定的样式，比如：
+#+ATTR_REVEAL: :frag grow
+放大
+#+ATTR_REVEAL: :frag shrink
+缩小
+#+ATTR_REVEAL: :frag fade-out
+淡出
+
+#+begin_export html
+<p>
+<span style="display: inline-block;" class="fragment">不同方向淡入：</span>
+<span style="display: inline-block;" class="fragment fade-up">⬆️</span>
+<span style="display: inline-block;" class="fragment fade-down">⬇️</span>
+<span style="display: inline-block;" class="fragment fade-left">⬅️</span>
+<span style="display: inline-block;" class="fragment fade-right">➡️</span>
+</p>
+#+end_export
+
+#+ATTR_REVEAL: :frag fade-in-then-out
+先淡入后淡出
+
+#+ATTR_REVEAL: :frag fade-in-then-semi-out
+先淡入然后虚化
+
+#+begin_export html
+<p>
+高亮：
+<span style="display: inline-block;" class="fragment highlight-red">红色、</span>
+<span style="display: inline-block;" class="fragment highlight-blue">蓝色、</span>
+<span style="display: inline-block;" class="fragment highlight-green">绿色</span>
+</p>
+#+end_export
+
+* TODO 过渡效果
+在切换幻灯片页面时可以选择不同的动画效果，比如：
+
+None - Fade - Slide - Convex - Concave - Zoom
+
+* 页面背景
+:PROPERTIES:
+:reveal_background: #dddddd
+:END:
+可以通过 ~data-background="#dddddd"~ 来设置页面的背景颜色，支持 CSS 的所有语法
+
+#+REVEAL_HTML: <a href="#" class="navigate-down enabled">
+#+attr_html: :class r-frame :style background:rgba(255,255,255,0.1); :width 178 :height 238 :alt Down arrow :data-lazy-loaded nil
+[[file:img/arrow.png]]
+#+REVEAL_HTML: </a>
+
+** 图片背景
+:PROPERTIES:
+:reveal_background: ./img/image-placeholder.png
+:END:
+
+#+begin_src html
+<section data-background="image.png">
+#+end_src
+
+** 图片平铺
+:PROPERTIES:
+:reveal_background: ./img/image-placeholder.png
+:reveal_background_size: 100px
+:reveal_background_repeat: repeat
+:END:
+
+#+begin_src html
+<section data-background="image.png" data-background-repeat="repeat" data-background-size="100px">
+#+end_src
+
+** 视频背景
+:PROPERTIES:
+:reveal_extra_attr: data-background-video="https://static.slid.es/site/homepage/v1/homepage-video-editor.mp4" style="background-color:rgba(0, 0, 0, 0.9);color:#fff;padding:20px;"
+:END:
+
+#+begin_src html
+<section data-background-video="video.mp4,video.webm">
+#+end_src
+
+** 还有动态图！
+:PROPERTIES:
+:reveal_background: ./img/90F8aUepslB84.gif
+:END:
+
+* TODO 背景过渡
+:PROPERTIES:
+:reveal_background: rgb(77, 126, 101)
+:reveal_background_trans: zoom
+:END:
+和幻灯片页面一样，背景也支持各种过渡动画效果，比如当前页的背景过渡效果是“zoom”
+
+#+begin_src javascript
+Reveal.configure({ backgroundTransition: 'zoom' })
+#+end_src
+
+* TODO 背景过渡
+:PROPERTIES:
+:reveal_background: rgb(181, 83, 60)
+:reveal_background_trans: zoom
+:END:
+特定幻灯片页面的设置可以覆盖全局设置
+
+#+begin_src javascript
+<section data-background-transition="zoom">
+#+end_src
+
+* Iframe 背景
+:PROPERTIES:
+:reveal_extra_attr: data-background-iframe="https://revealjs.com/" style="background-color:rgba(0, 0, 0, 0.9);color:#fff;padding:20px;width:30%;font-size:1vw"
+:END:
+使用 reveal.js 的一个好处是可以很方便地将其他 Web 内容嵌入到幻灯片中，比如使用其他网
+页作为幻灯片的背景
+
+尝试操作一下背景的 reveal.js 官网
+
+* 无序列表
+- 前面不显示数字
+- 俺也一样
+- 俺也一样
+- 俺也一样
+  
+* 有序列表
+1. 这是第一行
+2. 第二行
+3. 第三行
+
+* 表格
+| Item     | Value | Quantity |
+|----------+-------+----------|
+| Apples   | $1    |        7 |
+| Lemonade | $2    |       18 |
+| Bread    | $3    |        2 |
+
+* TODO 引用
+#+begin_quote
+Todo...
+#+end_quote
+
+* 内部链接
+你可以插入超链接跳转到当前幻灯片的其他页面，[[表格][点一下这里]]
+
+* 演讲视图
+和 PPT 的类似，可以将演讲者的页面和展示的页面分开，包含计时器、大纲视图、笔记等功
+能，具体用法看[[https://revealjs.com/speaker-view/][官方教程]]
+
+* TODO 导出为 PDF
+只要在当前 URL 后加上 ~?print-pdf~ 就能生成 PDF 排版，然后打印成 PDF 文件即可
+
+* 全局状态
+给某个页面设置 data-state="something"，当打开该页面时就会在 document 元素添加
+something 类，这可以帮助你设置一些全局属性，比如更换默认背景
+
+* 事件
+通过绑定 data-state 属性可以在每张幻灯片上触发自定义的事件
+
+#+begin_src javascript
+Reveal.on( 'customevent', function() {
+  console.log( '"customevent" has fired' );
+} );
+#+end_src
+
+* 中场休息
+按下 ~B~ 或者 ~.~ 可以暂停展示，将幻灯片黑屏
+
+* 更多功能
+- 支持从右到左展示
+- [[https://revealjs.com/api/][丰富的 Js 接口]]
+- [[https://revealjs.com/auto-slide/][自动播放]]
+- [[https://revealjs.com/backgrounds/#parallax-background][视差背景]]
+- [[https://revealjs.com/keyboard/][自定义快捷键]]
+
+* 谢谢观看
+#+HTML: <small>
+- [[https://slides.com/][在线编辑器]]
+- [[https://github.com/hakimel/reveal.js][源码和文档]]
+#+HTML: </small>

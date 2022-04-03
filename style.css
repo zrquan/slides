@@ -1,0 +1,13 @@
+.reveal {
+    font-size: 2vw;
+    background-color: #1a1626;
+}
+
+.reveal .controls button, .reveal .progress span, .reveal a  {
+    --tw-text-opacity: 1;
+    color: rgba(237, 100, 166, var(--tw-text-opacity));
+}
+
+.reveal small * {
+    vertical-align: top;
+}

@@ -1,0 +1,657 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<title>reveal.js demo</title>
+<meta name="author" content="4shen0ne"/>
+<style type="text/css">
+.underline { text-decoration: underline; }
+</style>
+<link rel="stylesheet" href="../reveal.js/dist/reveal.css"/>
+
+<link rel="stylesheet" href="../reveal.js/dist/theme/black.css" id="theme"/>
+
+<link rel="stylesheet" href="../style.css"/>
+<link rel="stylesheet" href="../reveal.js/plugin/highlight/zenburn.css"/>
+</head>
+<body>
+<div class="reveal">
+<div class="slides">
+<section id="sec-title-slide">
+<img src="./img/reveal-white-text.svg" alt="reveal.js" style="height:100px;margin:0 auto 4rem auto;background:transparent;">
+<h4>基于 Web 的幻灯片框架</h4>
+<p>
+    <small>
+        Create by <a href="https://zrquan.github.io">4shen0ne</a>
+    </small>
+</p>
+
+</section>
+
+<section>
+<section id="slide-orgf40066f">
+<h2 id="orgf40066f">什么是 reveal.js</h2>
+<p>
+reveal.js 是一个用来制作幻灯片的前端框架，使用它可以很便捷地用 HTML 文档写出效果
+丰富、交互功能强大的幻灯片网页。本页面将展示 reveal.js 的一些基础效果，除此之外，
+借助自定义的 javascript 和 css 代码你可以实现更多功能
+</p>
+
+<aside class="notes">
+<p>
+在启用了 notes 插件的情况下，按 s 可以打开演讲稿
+</p>
+
+<p>
+演讲稿窗口和幻灯片窗口分开展示，观众看不到演讲稿内容，但是通过设置可以在打印 pdf
+时包含演讲稿内容
+</p>
+
+<p>
+zoom 插件不会同时应用在两个窗口
+</p>
+
+<p>
+测试多行文本的展示情况
+</p>
+
+<p>
+测试多行文本的展示情况
+</p>
+
+<p>
+测试多行文本的展示情况
+</p>
+
+<p>
+测试多行文本的展示情况
+</p>
+
+<p>
+&#x2026;
+</p>
+
+</aside>
+
+</section>
+</section>
+<section>
+<section id="slide-org9cbd7ab">
+<h2 id="org9cbd7ab">垂直翻页</h2>
+<p>
+不同的幻灯片页面可以嵌套展现
+</p>
+
+<p>
+按空格浏览垂直方向的所有幻灯片
+</p>
+
+<a href="#" class="navigate-down enabled">
+
+<div id="orgc385277" class="figure">
+<p><img src="img/arrow.png" alt="Down arrow" class="r-frame" style="background:rgba(255,255,255,0.1);" width="178" height="238" />
+</p>
+</div>
+</a>
+
+</section>
+<section id="slide-org7090fd4">
+<h3 id="org7090fd4">第一级子页</h3>
+<p>
+页面嵌套可以很方便地组织文本内容的结构，比如用子页来详细说明顶层页面的主题
+</p>
+
+</section>
+<section id="slide-org662d677">
+<h3 id="org662d677">第二级子页</h3>
+<p>
+按方向键可以返回上层页面
+</p>
+
+<a href="#" class="navigate-up enabled">
+
+<div id="org0b9bb08" class="figure">
+<p><img src="img/arrow.png" alt="Up arrow" class="r-frame" style="background:rgba(255,255,255,0.1);transform:rotate(180deg);" width="178" height="238" />
+</p>
+</div>
+</a>
+
+</section>
+</section>
+<section>
+<section id="slide-org8606852">
+<h2 id="org8606852">在线编辑器</h2>
+<p>
+如果你没有 Web 开发经验，可以通过这个网站在线制作幻灯片：<a href="https://slides.com">https://slides.com</a>
+</p>
+
+</section>
+</section>
+<section>
+<section id="slide-orga5b9e2a" data-auto-animate>
+<h2 id="orga5b9e2a">代码块</h2>
+<div class="org-src-container">
+
+<pre><code class="javascript" data-line-numbers data-org-id="code-animation">import React, { useState } from 'react';
+ 
+function Example() {
+  const [count, setCount] = useState(0);
+ 
+  return (
+    ...
+  );
+}
+</code></pre>
+</div>
+
+<p>
+内置的 highlight 插件提供代码块高亮功能
+</p>
+
+</section>
+</section>
+<section>
+<section id="slide-org5920011" data-auto-animate>
+<h2 id="org5920011">动画过渡</h2>
+<div class="org-src-container">
+
+<pre><code class="javascript" data-line-numbers="|4,8-11|17|22-24" data-org-id="code-animation">import React, { useState } from 'react';
+ 
+function Example() {
+  const [count, setCount] = useState(0);
+ 
+  return (
+    &lt;div&gt;
+      &lt;p&gt;You clicked {count} times&lt;/p&gt;
+      &lt;button onClick={() =&gt; setCount(count + 1)}&gt;
+        Click me
+      &lt;/button&gt;
+    &lt;/div&gt;
+  );
+}
+ 
+function SecondExample() {
+  const [count, setCount] = useState(0);
+ 
+  return (
+    &lt;div&gt;
+      &lt;p&gt;You clicked {count} times&lt;/p&gt;
+      &lt;button onClick={() =&gt; setCount(count + 1)}&gt;
+        Click me
+      &lt;/button&gt;
+    &lt;/div&gt;
+  );
+}
+</code></pre>
+</div>
+
+</section>
+</section>
+<section>
+<section id="slide-orgb7e6a89">
+<h2 id="orgb7e6a89">视图</h2>
+<p>
+按 Esc 可以切换大纲视图
+</p>
+
+<p>
+启用内置的 zoom 插件后，按住 Alt 然后用鼠标左键点击任意位置可以放大，再点击一次复原
+</p>
+
+<p>
+(Linux 系统按住 Ctrl 加鼠标左键)
+</p>
+
+</section>
+</section>
+<section>
+<section id="slide-org7a0dd0e" data-auto-animate>
+<h2 id="org7a0dd0e">Auto-Animate</h2>
+<p>
+切换页面时，<a href="https://revealjs.com/auto-animate/">Auto-Animate</a> 可以自动给匹配的 DOM 元素添加动画效果
+</p>
+
+<div class="r-hstack justify-center">
+<div data-id="box1" style="background: #999; width: 50px; height: 50px; margin: 10px; border-radius: 5px;"></div>
+<div data-id="box2" style="background: #999; width: 50px; height: 50px; margin: 10px; border-radius: 5px;"></div>
+<div data-id="box3" style="background: #999; width: 50px; height: 50px; margin: 10px; border-radius: 5px;"></div>
+</div>
+
+</section>
+</section>
+<section>
+<section id="slide-org6f37c08" data-auto-animate>
+<h2 id="org6f37c08">&nbsp;</h2>
+<div class="r-hstack justify-center">
+<div data-id="box1" data-auto-animate-delay="0" style="background: cyan; width: 150px; height: 100px; margin: 10px;"></div>
+<div data-id="box2" data-auto-animate-delay="0.1" style="background: magenta; width: 150px; height: 100px; margin: 10px;"></div>
+<div data-id="box3" data-auto-animate-delay="0.2" style="background: yellow; width: 150px; height: 100px; margin: 10px;"></div>
+</div>
+<h2>AUTO-ANIMATE</h2>
+
+</section>
+</section>
+<section>
+<section id="slide-org0c7cc9a" data-auto-animate>
+<h2 id="org0c7cc9a">&nbsp;</h2>
+<div class="r-stack">
+<div data-id="box1" style="background: cyan; width: 300px; height: 300px; border-radius: 200px;"></div>
+<div data-id="box2" style="background: magenta; width: 200px; height: 200px; border-radius: 200px;"></div>
+<div data-id="box3" style="background: yellow; width: 100px; height: 100px; border-radius: 200px;"></div>
+</div>
+<h2>AUTO-ANIMATE</h2>
+
+</section>
+</section>
+<section>
+<section id="slide-orga83395f">
+<h2 id="orga83395f">触屏设备优化</h2>
+<p>
+reveal.js 对手机和平板等移动设备也做了优化，试试打开开发者工具切换到移动设备，然
+后用鼠标划动幻灯片
+</p>
+
+</section>
+</section>
+<section>
+<section id="slide-org86552bd">
+<h2 id="org86552bd">Markdown 支持</h2>
+<p>
+可以使用 Markdown 语法编写幻灯片的内容，详情参考 <a href="https://revealjs.com/markdown/">readme</a> 文档
+</p>
+
+<div class="org-src-container">
+
+<pre><code class="html" >&lt;section data-markdown&gt;
+  ## Markdown support
+ 
+  Write content using inline or external Markdown.
+  Instructions and more info available in the [readme](https://revealjs.com/markdown/).
+&lt;/section&gt;
+</code></pre>
+</div>
+
+</section>
+</section>
+<section>
+<section id="slide-org47c1560">
+<h2 id="org47c1560">&nbsp;</h2>
+<p>
+r-fit-text 类可以自动适应文本尺寸
+</p>
+
+<p class="r-fit-text">FIT TEXT</p>
+
+</section>
+</section>
+<section>
+<section id="slide-org71c85b1">
+<h2 id="org71c85b1">片段</h2>
+<p>
+向下翻页👇
+</p>
+
+<p class="fragment">
+继续翻页试试😁
+</p>
+
+<p>
+<span class="fragment">不同的</span><span class="fragment">片段</span><span class="fragment">相继展示</span>
+</p>
+
+</section>
+<section id="slide-org25015d2">
+<h3 id="org25015d2">片段样式</h3>
+<p>
+不同的片段可以设置特定的样式，比如：
+</p>
+<p class="fragment grow">
+放大
+</p>
+<p class="fragment shrink">
+缩小
+</p>
+<p class="fragment fade-out">
+淡出
+</p>
+
+<p>
+<span style="display: inline-block;" class="fragment">不同方向淡入：</span>
+<span style="display: inline-block;" class="fragment fade-up">⬆️</span>
+<span style="display: inline-block;" class="fragment fade-down">⬇️</span>
+<span style="display: inline-block;" class="fragment fade-left">⬅️</span>
+<span style="display: inline-block;" class="fragment fade-right">➡️</span>
+</p>
+
+<p class="fragment fade-in-then-out">
+先淡入后淡出
+</p>
+
+<p class="fragment fade-in-then-semi-out">
+先淡入然后虚化
+</p>
+
+<p>
+高亮：
+<span style="display: inline-block;" class="fragment highlight-red">红色、</span>
+<span style="display: inline-block;" class="fragment highlight-blue">蓝色、</span>
+<span style="display: inline-block;" class="fragment highlight-green">绿色</span>
+</p>
+
+</section>
+</section>
+<section>
+<section id="slide-orgc467dd2">
+<h2 id="orgc467dd2"><span class="todo TODO">TODO</span> 过渡效果</h2>
+<p>
+在切换幻灯片页面时可以选择不同的动画效果，比如：
+</p>
+
+<p>
+None - Fade - Slide - Convex - Concave - Zoom
+</p>
+
+</section>
+</section>
+<section>
+<section id="slide-org4c23ab0" data-background="#dddddd">
+<h2 id="org4c23ab0">页面背景</h2>
+<p>
+可以通过 <code>data-background="#dddddd"</code> 来设置页面的背景颜色，支持 CSS 的所有语法
+</p>
+
+<a href="#" class="navigate-down enabled">
+
+<div id="orgd666379" class="figure">
+<p><img src="img/arrow.png" alt="Down arrow" class="r-frame" style="background:rgba(255,255,255,0.1);" width="178" height="238" />
+</p>
+</div>
+</a>
+
+</section>
+<section id="slide-orge7d880e" data-background="./img/image-placeholder.png">
+<h3 id="orge7d880e">图片背景</h3>
+<div class="org-src-container">
+
+<pre><code class="html" >&lt;section data-background="image.png"&gt;
+</code></pre>
+</div>
+
+</section>
+<section id="slide-orgc5a52e6" data-background="./img/image-placeholder.png" data-background-size="100px" data-background-repeat="repeat">
+<h3 id="orgc5a52e6">图片平铺</h3>
+<div class="org-src-container">
+
+<pre><code class="html" >&lt;section data-background="image.png" data-background-repeat="repeat" data-background-size="100px"&gt;
+</code></pre>
+</div>
+
+</section>
+<section id="slide-org7138564" data-background-video="https://static.slid.es/site/homepage/v1/homepage-video-editor.mp4" style="background-color:rgba(0, 0, 0, 0.9);color:#fff;padding:20px;">
+<h3 id="org7138564">视频背景</h3>
+<div class="org-src-container">
+
+<pre><code class="html" >&lt;section data-background-video="video.mp4,video.webm"&gt;
+</code></pre>
+</div>
+
+</section>
+<section id="slide-orgbce1f66" data-background="./img/90F8aUepslB84.gif">
+<h3 id="orgbce1f66">还有动态图！</h3>
+
+</section>
+</section>
+<section>
+<section id="slide-org8a03f41" data-background="rgb(77, 126, 101)" data-background-transition="zoom">
+<h2 id="org8a03f41"><span class="todo TODO">TODO</span> 背景过渡</h2>
+<p>
+和幻灯片页面一样，背景也支持各种过渡动画效果，比如当前页的背景过渡效果是“zoom”
+</p>
+
+<div class="org-src-container">
+
+<pre><code class="javascript" >Reveal.configure({ backgroundTransition: 'zoom' })
+</code></pre>
+</div>
+
+</section>
+</section>
+<section>
+<section id="slide-org1e44024" data-background="rgb(181, 83, 60)" data-background-transition="zoom">
+<h2 id="org1e44024"><span class="todo TODO">TODO</span> 背景过渡</h2>
+<p>
+特定幻灯片页面的设置可以覆盖全局设置
+</p>
+
+<div class="org-src-container">
+
+<pre><code class="javascript" >&lt;section data-background-transition="zoom"&gt;
+</code></pre>
+</div>
+
+</section>
+</section>
+<section>
+<section id="slide-orgeeab3f0" data-background-iframe="https://revealjs.com/" style="background-color:rgba(0, 0, 0, 0.9);color:#fff;padding:20px;width:30%;font-size:1vw">
+<h2 id="orgeeab3f0">Iframe 背景</h2>
+<p>
+使用 reveal.js 的一个好处是可以很方便地将其他 Web 内容嵌入到幻灯片中，比如使用其他网
+页作为幻灯片的背景
+</p>
+
+<p>
+尝试操作一下背景的 reveal.js 官网
+</p>
+
+</section>
+</section>
+<section>
+<section id="slide-org371f435">
+<h2 id="org371f435">无序列表</h2>
+<ul>
+<li>前面不显示数字</li>
+<li>俺也一样</li>
+<li>俺也一样</li>
+<li>俺也一样</li>
+
+</ul>
+
+</section>
+</section>
+<section>
+<section id="slide-org4b6b150">
+<h2 id="org4b6b150">有序列表</h2>
+<ol>
+<li>这是第一行</li>
+<li>第二行</li>
+<li>第三行</li>
+
+</ol>
+
+</section>
+</section>
+<section>
+<section id="slide-org9a7b6fe">
+<h2 id="org9a7b6fe">表格</h2>
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-left" />
+
+<col  class="org-left" />
+
+<col  class="org-right" />
+</colgroup>
+<thead>
+<tr>
+<th scope="col" class="org-left">Item</th>
+<th scope="col" class="org-left">Value</th>
+<th scope="col" class="org-right">Quantity</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="org-left">Apples</td>
+<td class="org-left">$1</td>
+<td class="org-right">7</td>
+</tr>
+
+<tr>
+<td class="org-left">Lemonade</td>
+<td class="org-left">$2</td>
+<td class="org-right">18</td>
+</tr>
+
+<tr>
+<td class="org-left">Bread</td>
+<td class="org-left">$3</td>
+<td class="org-right">2</td>
+</tr>
+</tbody>
+</table>
+
+</section>
+</section>
+<section>
+<section id="slide-org3caec94">
+<h2 id="org3caec94"><span class="todo TODO">TODO</span> 引用</h2>
+<blockquote>
+<p>
+Todo&#x2026;
+</p>
+</blockquote>
+
+</section>
+</section>
+<section>
+<section id="slide-org65d67b7">
+<h2 id="org65d67b7">内部链接</h2>
+<p class="backwardlink">
+你可以插入超链接跳转到当前幻灯片的其他页面，<a href="#/slide-org9a7b6fe" class="backwardlink">点一下这里</a>
+</p>
+
+</section>
+</section>
+<section>
+<section id="slide-orgaa483cb">
+<h2 id="orgaa483cb">演讲视图</h2>
+<p>
+和 PPT 的类似，可以将演讲者的页面和展示的页面分开，包含计时器、大纲视图、笔记等功
+能，具体用法看<a href="https://revealjs.com/speaker-view/">官方教程</a>
+</p>
+
+</section>
+</section>
+<section>
+<section id="slide-org53ad7bd">
+<h2 id="org53ad7bd"><span class="todo TODO">TODO</span> 导出为 PDF</h2>
+<p>
+只要在当前 URL 后加上 <code>?print-pdf</code> 就能生成 PDF 排版，然后打印成 PDF 文件即可
+</p>
+
+</section>
+</section>
+<section>
+<section id="slide-org1f73142">
+<h2 id="org1f73142">全局状态</h2>
+<p>
+给某个页面设置 data-state=&ldquo;something&rdquo;，当打开该页面时就会在 document 元素添加
+something 类，这可以帮助你设置一些全局属性，比如更换默认背景
+</p>
+
+</section>
+</section>
+<section>
+<section id="slide-orgf700fe7">
+<h2 id="orgf700fe7">事件</h2>
+<p>
+通过绑定 data-state 属性可以在每张幻灯片上触发自定义的事件
+</p>
+
+<div class="org-src-container">
+
+<pre><code class="javascript" >Reveal.on( 'customevent', function() {
+  console.log( '"customevent" has fired' );
+} );
+</code></pre>
+</div>
+
+</section>
+</section>
+<section>
+<section id="slide-orge68324f">
+<h2 id="orge68324f">中场休息</h2>
+<p>
+按下 <code>B</code> 或者 <code>.</code> 可以暂停展示，将幻灯片黑屏
+</p>
+
+</section>
+</section>
+<section>
+<section id="slide-org238a68f">
+<h2 id="org238a68f">更多功能</h2>
+<ul>
+<li>支持从右到左展示</li>
+<li><a href="https://revealjs.com/api/">丰富的 Js 接口</a></li>
+<li><a href="https://revealjs.com/auto-slide/">自动播放</a></li>
+<li><a href="https://revealjs.com/backgrounds/#parallax-background">视差背景</a></li>
+<li><a href="https://revealjs.com/keyboard/">自定义快捷键</a></li>
+
+</ul>
+
+</section>
+</section>
+<section>
+<section id="slide-orgb61023d">
+<h2 id="orgb61023d">谢谢观看</h2>
+<small>
+<ul>
+<li><a href="https://slides.com/">在线编辑器</a></li>
+<li><a href="https://github.com/hakimel/reveal.js">源码和文档</a></li>
+
+</ul>
+</small>
+</section>
+</section>
+</div>
+</div>
+<script src="../reveal.js/dist/reveal.js"></script>
+<script src="../reveal.js/plugin/zoom/zoom.js"></script>
+<script src="../reveal.js/plugin/notes/notes.js"></script>
+<script src="../reveal.js/plugin/highlight/highlight.js"></script>
+<script src="../script.js"></script>
+<script>
+// Full list of configuration options available here:
+// https://github.com/hakimel/reveal.js#configuration
+Reveal.initialize({
+
+controls: true,
+progress: true,
+history: false,
+center: true,
+slideNumber: false,
+rollingLinks: false,
+keyboard: true,
+mouseWheel: false,
+fragmentInURL: false,
+hashOneBasedIndex: false,
+pdfSeparateFragments: true,
+overview: true,
+minScale: 0.20,
+maxScale: 2.00,
+
+transition: 'slide',
+transitionSpeed: 'default',
+
+// Plugins with reveal.js 4.x
+plugins: [ RevealZoom, RevealNotes, RevealHighlight ],
+
+// Optional libraries used to extend reveal.js
+dependencies: [
+]
+
+});
+</script>
+</body>
+</html>
