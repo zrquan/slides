@@ -1,0 +1,1056 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<title>GadgetInspector 源码浅析</title>
+<meta name="author" content="4shen0ne"/>
+<style type="text/css">
+.underline { text-decoration: underline; }
+</style>
+<link rel="stylesheet" href="../reveal.js/dist/reveal.css"/>
+
+<link rel="stylesheet" href="../reveal.js/dist/theme/black.css" id="theme"/>
+
+<link rel="stylesheet" href="style.css"/>
+<link rel="stylesheet" href="../reveal.js/plugin/highlight/zenburn.css"/>
+</head>
+<body>
+<div class="reveal">
+<div class="slides">
+<section id="sec-title-slide">
+<h1 class="title">GadgetInspector 源码浅析</h1><h2 class="author">4shen0ne</h2><p class="date">Created: 2022-05-29 Sun 23:56</p>
+</section>
+
+
+<section>
+<section id="slide-org3e88a64">
+<h2 id="org3e88a64">简介</h2>
+<p>
+GadgetInspector 是 Black Hat 2018 上 Netflix 安全团队展示的一个 Java 静态分析工具，用于挖掘 Java 反序列化利用链。其核心思路是利用 ASM 模拟 JVM 运行时操作数栈和局部变量表的修改情况，实现代码执行过程中的污点路径分析，而不需要去实际执行字节码
+</p>
+
+<p>
+Repo: <a href="https://github.com/JackOfMostTrades/gadgetinspector">https://github.com/JackOfMostTrades/gadgetinspector</a>
+</p>
+
+</section>
+</section>
+<section>
+<section id="slide-org2587c7e">
+<h2 id="org2587c7e">前置知识</h2>
+<div class="outline-text-2" id="text-org2587c7e">
+</div>
+</section>
+<section id="slide-org115ff1a">
+<h3 id="org115ff1a">Java 反序列化漏洞</h3>
+<p>
+攻击者通过控制输入流中的数据，可以控制目标代码的行为
+</p>
+
+
+<div id="org830c163" class="figure">
+<p><img src="img/deserial.svg" alt="deserial.svg" class="org-svg" width="600" />
+</p>
+</div>
+
+<aside class="notes">
+<p>
+Object#finalize 方法在 GC 回收一个对象时执行，利用其延后 sink 点执行可以绕过一些安全机制，或者黑名单
+</p>
+
+</aside>
+
+</section>
+<section id="slide-org650db06">
+<h3 id="org650db06">污点分析</h3>
+<ul>
+<li>一种跟踪并分析危险数据（污点）在程序中流动的技术</li>
+<li>污染源 Source, 汇聚处 Sink, 污点处理 Sanitizers</li>
+<li>基于数据流 / 基于依赖关系</li>
+
+</ul>
+
+</section>
+<section id="slide-org3cd82bf" data-auto-animate>
+<h4 id="org3cd82bf">基于数据流（显式）</h4>
+<div class="org-src-container">
+
+<pre><code class="java" data-line-numbers data-org-id="code-animation">void foo() {
+    int a = source();
+    int x;
+    x = a * 2;
+    sink(x);
+}
+</code></pre>
+</div>
+
+</section>
+<section id="slide-orgf298950" data-auto-animate>
+<h4 id="orgf298950">基于依赖关系（隐式）</h4>
+<div class="org-src-container">
+
+<pre><code class="java" data-line-numbers="" data-org-id="code-animation">void foo() {
+    int a = source();
+    int x = 0;
+    if (a &lt; 0) {
+        x += 1;
+    }
+    sink(x);
+}
+</code></pre>
+</div>
+
+</section>
+<section id="slide-orgf969007">
+<h3 id="orgf969007">ASM</h3>
+<p>
+一个 Java Class 字节码操作库，使用访问者设计模式。开发者通过实现 ASM 提供的 API 来操控 Java Class 结构
+</p>
+
+<p>
+比如通过 ClassVisitor 构建一个 Java Class, ASM 会依次执行下述访问方法，开发者只需要在自己实现的 ClassVisitor 子类中重写以下方法而不需要直接操作数据
+</p>
+<blockquote>
+<p>
+visit [ visitSource ] [ visitModule ][ visitNestHost ][ visitOuterClass ] ( visitAnnotation | visitTypeAnnotation | visitAttribute )* ( visitNestMember | [ * visitPermittedSubclass ] | visitInnerClass | visitRecordComponent | visitField | visitMethod )* visitEnd
+</p>
+</blockquote>
+
+</section>
+<section id="slide-orgb42d206">
+<h3 id="orgb42d206">JVM</h3>
+<p>
+虚拟机栈帧结构，GadgetInspector 通过操作数栈和局部变量表传递污点标记
+</p>
+
+
+<div id="org95760bc" class="figure">
+<p><img src="img/jvm-stack.svg" alt="jvm-stack.svg" class="org-svg" />
+</p>
+</div>
+
+</section>
+</section>
+<section>
+<section id="slide-orgb6843d8">
+<h2 id="orgb6843d8">整体流程</h2>
+<div class="outline-text-2" id="text-orgb6843d8">
+</div>
+</section>
+<section id="slide-orge3d7a33" data-auto-animate>
+<h3 id="orge3d7a33">枚举所有类和方法的层级关系</h3>
+<div class="org-src-container">
+
+<pre><code class="java" data-line-numbers="" data-org-id="code-animation">public class GadgetInspector {
+    public static void main(String[] args) throw Exception {
+        ...
+        if (...) {
+            MethodDiscovery methodDiscovery = new MethodDiscovery();
+            methodDiscovery.discover(classResourceEnumerator);
+            methodDiscovery.save();
+        }
+        ...
+    }
+}
+</code></pre>
+</div>
+
+</section>
+<section id="slide-org3139e41" data-auto-animate>
+<h3 id="org3139e41">分析单个方法的污点传播</h3>
+<div class="org-src-container">
+
+<pre><code class="java" data-line-numbers="" data-org-id="code-animation">public class GadgetInspector {
+    public static void main(String[] args) throw Exception {
+        ...
+        if (...) {
+            MethodDiscovery methodDiscovery = new MethodDiscovery();
+            methodDiscovery.discover(classResourceEnumerator);
+            methodDiscovery.save();
+        }
+        if (...) {
+            PassthroughDiscovery passthroughDiscovery = new PassthroughDiscovery();
+            passthroughDiscovery.discover(classResourceEnumerator, config);
+            passthroughDiscovery.save();
+        }
+        ...
+    }
+}
+</code></pre>
+</div>
+
+</section>
+<section id="slide-org4527c59" data-auto-animate>
+<h3 id="org4527c59">分析调用路径的污点传播</h3>
+<div class="org-src-container">
+
+<pre><code class="java" data-line-numbers="" data-org-id="code-animation">public class GadgetInspector {
+    public static void main(String[] args) throw Exception {
+        ...
+        if (...) {
+            PassthroughDiscovery passthroughDiscovery = new PassthroughDiscovery();
+            passthroughDiscovery.discover(classResourceEnumerator, config);
+            passthroughDiscovery.save();
+        }
+        if (...) {
+            CallGraphDiscovery callGraphDiscovery = new CallGraphDiscovery();
+            callGraphDiscovery.discover(classResourceEnumerator, config);
+            callGraphDiscovery.save();
+        }
+        ...
+    }
+}
+</code></pre>
+</div>
+
+</section>
+<section id="slide-orgff3bcb8" data-auto-animate>
+<h3 id="orgff3bcb8">枚举 Sources</h3>
+<div class="org-src-container">
+
+<pre><code class="java" data-line-numbers="" data-org-id="code-animation">public class GadgetInspector {
+    public static void main(String[] args) throw Exception {
+        ...
+        if (...) {
+            CallGraphDiscovery callGraphDiscovery = new CallGraphDiscovery();
+            callGraphDiscovery.discover(classResourceEnumerator, config);
+            callGraphDiscovery.save();
+        }
+        if (...) {
+            SourceDiscovery sourceDiscovery = config.getSourceDiscovery();
+            sourceDiscovery.discover();
+            sourceDiscovery.save();
+        }
+        ...
+    }
+}
+</code></pre>
+</div>
+
+</section>
+<section id="slide-orgafe15bc" data-auto-animate>
+<h3 id="orgafe15bc">挖掘利用链</h3>
+<div class="org-src-container">
+
+<pre><code class="java" data-line-numbers="" data-org-id="code-animation">public class GadgetInspector {
+    public static void main(String[] args) throw Exception {
+        ...
+        if (...) {
+            SourceDiscovery sourceDiscovery = config.getSourceDiscovery();
+            sourceDiscovery.discover();
+            sourceDiscovery.save();
+        }
+        {
+            GadgetChainDiscovery gadgetChainDiscovery = new GadgetChainDiscovery(config);
+            gadgetChainDiscovery.discover();
+        }
+    }
+}
+</code></pre>
+</div>
+
+</section>
+</section>
+<section>
+<section id="slide-orgb81a289">
+<h2 id="orgb81a289">源码分析</h2>
+<div class="outline-text-2" id="text-orgb81a289">
+</div>
+</section>
+<section id="slide-orgc189f2a">
+<h3 id="orgc189f2a">初始化 URLClassLoader</h3>
+<p>
+将目标 jar 或 war（WEB-INF/classes &amp; WEB-INF/lib）资源添加到 classpath, 后续用来加载类
+</p>
+<div class="org-src-container">
+
+<pre><code class="java" data-line-numbers="|3|10" data-org-id="code-animation">if (args.length == argIndex+1 &amp;&amp; args[argIndex].toLowerCase().endsWith(".war")) {
+    Path path = Paths.get(args[argIndex]);
+    classLoader = Util.getWarClassLoader(path);
+} else {
+    final Path[] jarPaths = new Path[args.length - argIndex];
+    for (int i = 0; i &lt; args.length - argIndex; i++) {
+        ...
+        jarPaths[i] = path;
+    }
+    classLoader = Util.getJarClassLoader(jarPaths);
+}
+final ClassResourceEnumerator classResourceEnumerator = new ClassResourceEnumerator(classLoader);
+</code></pre>
+</div>
+
+</section>
+<section id="slide-orgfccd166">
+<h3 id="orgfccd166">初始化 ClassResourceEnumerator</h3>
+<ul>
+<li>ClassResourceEnumerator#getAllClasses</li>
+<li>ClassResourceEnumerator$ClassLoaderClassResource#getInputStream</li>
+
+</ul>
+
+</section>
+<section id="slide-orga753650">
+<h4 id="orga753650">如何获取运行时类？</h4>
+<p>
+通过 String.class 定位 rt.jar
+</p>
+<div class="org-src-container">
+
+<pre><code class="java" data-line-numbers="|1,2|5,6" data-org-id="code-animation">URL stringClassUrl = Object.class.getResource("String.class");
+URLConnection connection = stringClassUrl.openConnection();
+Collection&lt;ClassResource&gt; result = new ArrayList&lt;&gt;();
+if (connection instanceof JarURLConnection) {
+    URL runtimeUrl = ((JarURLConnection) connection).getJarFileURL();
+    URLClassLoader classLoader = new URLClassLoader(new URL[]{runtimeUrl});
+
+    for (ClassPath.ClassInfo classInfo : ClassPath.from(classLoader).getAllClasses()) {
+        result.add(new ClassLoaderClassResource(classLoader, classInfo.getResourceName()));
+    }
+    return result;
+}
+</code></pre>
+</div>
+
+<aside class="notes">
+<p>
+rt.jar 由 bootstrap classloader 加载，所以不在 classpath 中
+</p>
+
+</aside>
+
+</section>
+<section>
+
+<p>
+Java9 新增了模块化特性，通过 <code>jrt:/</code> 协议来获取运行时类
+</p>
+<div class="org-src-container">
+
+<pre><code class="java" >FileSystem fs = FileSystems.getFileSystem(URI.create("jrt:/"));
+Files.walk(fs.getPath("/")).forEach(p -&gt; {
+    if (p.toString().toLowerCase().endsWith(".class")) {
+        result.add(new PathClassResource(p));
+    }
+});
+</code></pre>
+</div>
+
+</section>
+<section id="slide-org18bb355">
+<h3 id="org18bb355">MethodDiscovery</h3>
+<p>
+通过 ClassResourceEnumerator 枚举每个类并获取输入流，利用 ASM 记录类、属性、方法的信息
+</p>
+
+<ul>
+<li>MethodDiscoveryClassVisitor
+<ul>
+<li>visit：记录类基本信息，构建 Handle 实例</li>
+<li>visitField：记录成员变量信息</li>
+<li>visitMethod：构建 MethodReference，和当前类绑定</li>
+<li>visitEnd：构建 ClassReference</li>
+
+</ul></li>
+
+</ul>
+
+</section>
+<section id="slide-orgc761a6c">
+<h4 id="orgc761a6c">InheritanceDeriver</h4>
+<p>
+通过递归枚举父类和所有接口，记录类的继承链
+</p>
+
+<p>
+输出格式： <code>&lt;类名&gt;  &lt;父类名&gt;  &lt;接口&gt;  &lt;接口&gt;...</code>
+</p>
+
+<div class="org-src-container">
+
+<pre><code class="java" data-line-numbers="|4|7|17" data-org-id="code-animation">private static void getAllParents(...) {
+    Set&lt;ClassReference.Handle&gt; parents = new HashSet&lt;&gt;();
+    if (classReference.getSuperClass() != null) {
+        parents.add(new ClassReference.Handle(classReference.getSuperClass()));
+    }
+    for (String iface : classReference.getInterfaces()) {
+        parents.add(new ClassReference.Handle(iface));
+    }
+
+    for (ClassReference.Handle immediateParent : parents) {
+        ClassReference parentClassReference = classMap.get(immediateParent);
+        if (parentClassReference == null) {
+            continue;
+        }
+        allParents.add(parentClassReference.getHandle());
+        // 递归查找所有父类或接口，都添加到allParents中
+        getAllParents(parentClassReference, classMap, allParents);
+    }
+}
+</code></pre>
+</div>
+
+</section>
+<section id="slide-orgf729f76">
+<h3 id="orgf729f76">PassthroughDiscovery</h3>
+<p>
+分析方法的返回值受到哪些参数的影响
+</p>
+
+<div id="orgaf3ffe6" class="figure">
+<p><img src="img/step2.png" alt="step2.png" width="600" />
+</p>
+</div>
+
+</section>
+<section id="slide-org4c0c5b0">
+<h4 id="org4c0c5b0">具体实现</h4>
+<ol>
+<li>拓扑逆排序，即完整分析一条调用链后，将调用链的排序反转</li>
+<li>分析每个方法的参数和返回值的污染关系(通过 PassthroughDataflowMethodVisitor 实现)</li>
+
+</ol>
+
+<div class="org-src-container">
+
+<pre><code class="java" data-line-numbers="|9,10|12|13" data-org-id="code-animation">public class PassthroughDiscovery {
+    private final Map&lt;MethodReference.Handle, Set&lt;MethodReference.Handle&gt;&gt; methodCalls = new HashMap&lt;&gt;();
+    private Map&lt;MethodReference.Handle, Set&lt;Integer&gt;&gt; passthroughDataflow;
+    public void discover(...) {
+        Map&lt;~&gt; methodMap = DataLoader.loadMethods();
+        Map&lt;~&gt; classMap = DataLoader.loadClasses();
+        InheritanceMap inheritanceMap = InheritanceMap.load();
+
+        Map&lt;String, ClassResourceEnumerator.ClassResource&gt; classResourceByName =
+                discoverMethodCalls(classResourceEnumerator);
+
+        List&lt;MethodReference.Handle&gt; sortedMethods = topologicallySortMethodCalls();
+        passthroughDataflow = calculatePassthroughDataflow(...);
+    }
+    ...
+}
+</code></pre>
+</div>
+
+<aside class="notes">
+<p>
+discoverMethodCalls 用于初始化 methodCalls 和 classResourceByName
+methodCalls: Key =&gt; 当前方法，Value =&gt; Key 所调用的方法集合
+</p>
+
+</aside>
+
+</section>
+<section id="slide-org313a0b6">
+<h4 id="org313a0b6">逆拓扑排序（DFS 实现）</h4>
+<p>
+拓扑排序是一个有向无环图的所有顶点的线性序列，在这里表示所有方法的调用路径，而逆拓扑排序则是其逆序
+</p>
+
+<p>
+PassthroughDiscovery#dfsTsort 通过栈结构和深度优先策略实现逆拓扑排序，将调用路径上的节点入栈，然后终点最先出栈加入列表
+</p>
+
+<div class="org-src-container">
+
+<pre><code class="java" data-line-numbers="|3,6,11|15|17" data-org-id="code-animation">void dfsTsort(outgoingReferences, sortedMethods, visitedNodes, stack, node) {
+    // 当前路径存在环，直接返回
+    if (stack.contains(node)) {
+        return;
+    }
+    if (visitedNodes.contains(node)) {
+        return;
+    }
+    // 所有出边上的邻接点（即调用的方法）
+    Set&lt;MethodReference.Handle&gt; outgoingRefs = outgoingReferences.get(node);
+    if (outgoingRefs == null) {
+        return;
+    }
+
+    stack.add(node);
+    for (MethodReference.Handle child : outgoingRefs) {
+        dfsTsort(outgoingReferences, sortedMethods, visitedNodes, stack, child);
+    }
+    stack.remove(node);
+    visitedNodes.add(node);
+    sortedMethods.add(node);
+}
+</code></pre>
+</div>
+
+<aside class="notes">
+<p>
+作用：当前方法所调用的子方法，肯定位于 sortedMethods 的前面
+</p>
+
+</aside>
+
+</section>
+<section id="slide-org24c65e9">
+<h4 id="org24c65e9">PassthroughDataflowMethodVisitor</h4>
+<p>
+继承 TaintTrackingMethodVisitor&lt;Integer&gt;，实现了以下方法：
+</p>
+<ul>
+<li>visitCode：初始化模拟操作数栈和局部变量表</li>
+<li>visitFieldInsn：处理属性访问过程的污点传播</li>
+<li>visitMethodInsn：处理方法访问过程的污点传播</li>
+<li>visitInsn：记录操作数栈顶的返回值（污点标记）</li>
+
+</ul>
+
+</section>
+<section id="slide-orgeb76335">
+<h4 id="orgeb76335">&nbsp;</h4>
+<p>
+visitCode - 表示访问当前方法，将参数出栈保存到局部变量表
+</p>
+<div class="org-src-container">
+
+<pre><code class="java" data-line-numbers="|5|12" data-org-id="code-animation">public void visitCode() {
+    super.visitCode();
+    int localIndex = 0;
+    int argIndex = 0;
+    if ((this.access &amp; Opcodes.ACC_STATIC) == 0) {
+        setLocalTaint(localIndex, argIndex);
+        localIndex += 1;
+        argIndex += 1;
+    }
+    for (Type argType : Type.getArgumentTypes(desc)) {
+        setLocalTaint(localIndex, argIndex);  // 传入参数污染局部变量表
+        localIndex += argType.getSize();
+        argIndex += 1;
+    }
+}
+</code></pre>
+</div>
+
+</section>
+<section id="slide-orgbf05824" data-auto-animate>
+<h4 id="orgbf05824">&nbsp;</h4>
+<p>
+visitFieldInsn - 表示访问一个属性，如果用 transient 标识则视为安全（默认不会被序列化）
+</p>
+<div class="org-src-container">
+
+<pre><code class="java" data-line-numbers="|9|12-14" data-org-id="code-animation">public void visitFieldInsn(int opcode, String owner, String name, String desc) {
+    switch (opcode) {
+        ...
+        case Opcodes.GETFIELD:
+            Type type = Type.getType(desc);
+            if (type.getSize() == 1) {
+                Boolean isTransient = null;
+
+                if (!couldBeSerialized(...)) {
+                    isTransient = Boolean.TRUE;
+                } else {
+                    ClassReference clazz = classMap.get(new ClassReference.Handle(owner));
+                    while (clazz != null) {
+                        for (ClassReference.Member member : clazz.getMembers()) {
+                            // 找到当前属性判断是否为 transient
+                        }
+                        if (isTransient != null) {
+                            break;
+                        }
+                        clazz = classMap.get(new ClassReference.Handle(clazz.getSuperClass()));
+                    }
+                }
+                ...
+            }
+        ...
+    }
+}
+</code></pre>
+</div>
+
+<aside class="notes">
+<p>
+GETFIELD: 访问属性时栈顶为类实例，访问完毕将属性入栈
+</p>
+
+</aside>
+
+</section>
+<section id="slide-orgb1ef21e" data-auto-animate>
+<h4 id="orgb1ef21e">&nbsp;</h4>
+<p>
+visitFieldInsn - 表示访问一个属性，如果用 transient 标识则视为安全（默认不会被序列化）
+</p>
+<div class="org-src-container">
+
+<pre><code class="java" data-line-numbers="|10|12" data-org-id="code-animation">public void visitFieldInsn(int opcode, String owner, String name, String desc) {
+    switch (opcode) {
+        ...
+        case Opcodes.GETFIELD:
+            Type type = Type.getType(desc);
+            if (type.getSize() == 1) {
+                ...
+                Set&lt;Integer&gt; taint;
+                if (!Boolean.TRUE.equals(isTransient)) {
+                    taint = getStackTaint(0);
+                } else {
+                    taint = new HashSet&lt;&gt;();
+                }
+
+                super.visitFieldInsn(opcode, owner, name, desc);
+                setStackTaint(0, taint);
+                return;
+            }
+            break;
+        default:
+            ...
+    }
+    super.visitFieldInsn(opcode, owner, name, desc);
+}
+</code></pre>
+</div>
+
+</section>
+<section id="slide-org29ee586" data-auto-animate>
+<h4 id="org29ee586">&nbsp;</h4>
+<p>
+visitMethodInsn - 表示调用一个方法，此时参数已经依次入栈
+</p>
+<div class="org-src-container">
+
+<pre><code class="java" >public void visitMethodInsn(int opcode, String owner, String name, String desc, boolean itf) {
+    Type[] argTypes = Type.getArgumentTypes(desc);
+    if (opcode != Opcodes.INVOKESTATIC) {
+        Type[] extendedArgTypes = new Type[argTypes.length+1];
+        System.arraycopy(argTypes, 0, extendedArgTypes, 1, argTypes.length);
+        extendedArgTypes[0] = Type.getObjectType(owner); // this
+        argTypes = extendedArgTypes;
+    }
+    int retSize = Type.getReturnType(desc).getSize();
+    Set&lt;Integer&gt; resultTaint;
+    switch (opcode) {
+        ...
+    }
+}
+</code></pre>
+</div>
+
+<aside class="notes">
+<p>
+目的：外层方法的污点信息经过一次方法调用后如何传播
+argTaint: 子方法的污点参数，污点信息是外层方法的参数索引
+passthroughDataflow: 已经分析过的方法，因为经过逆拓扑排序，可以保证所调用的方法已经经过分析
+</p>
+
+</aside>
+
+</section>
+<section id="slide-orgfccbe3f" data-auto-animate>
+<h4 id="orgfccbe3f">&nbsp;</h4>
+<p>
+visitMethodInsn - 表示调用一个方法，此时参数已经依次入栈
+</p>
+<div class="org-src-container">
+
+<pre><code class="java" data-line-numbers="|17|19|22,23|27-29|31-33" data-org-id="code-animation">public void visitMethodInsn(int opcode, String owner, String name, String desc, boolean itf) {
+    ...
+    int retSize = Type.getReturnType(desc).getSize();
+    Set&lt;Integer&gt; resultTaint;
+    switch (opcode) {
+        ...
+        case Opcodes.INVOKEVIRTUAL:
+            final List&lt;Set&lt;Integer&gt;&gt; argTaint = new ArrayList&lt;Set&lt;Integer&gt;&gt;(argTypes.length);
+            for (int i = 0; i &lt; argTypes.length; i++) {
+                argTaint.add(null);
+            }
+
+            int stackIndex = 0;
+            for (int i = 0; i &lt; argTypes.length; i++) {
+                Type argType = argTypes[i];
+                if (argType.getSize() &gt; 0) {
+                    argTaint.set(argTypes.length - 1 - i, getStackTaint(stackIndex + argType.getSize() - 1));
+                }
+                stackIndex += argType.getSize();
+            }
+
+            if (name.equals("&lt;init&gt;")) {
+                resultTaint = argTaint.get(0);
+            } else {
+                resultTaint = new HashSet&lt;&gt;();
+            }
+            Set&lt;Integer&gt; passthrough = passthroughDataflow.get(
+                    new MethodReference.Handle(new ClassReference.Handle(owner), name, desc)
+            );
+            if (passthrough != null) {
+                for (Integer arg : passthrough) {
+                    resultTaint.addAll(argTaint.get(arg));
+                }
+            }
+    }
+}
+</code></pre>
+</div>
+
+<aside class="notes">
+<ul>
+<li>getStackTaint 获取栈顶标记传给 argTaint(从右到左)</li>
+<li>stackIndex 递增，Double 和 Long 需要加 2</li>
+<li>从 passthroughDataflow 直接获取调用方法的污点传播信息</li>
+
+</ul>
+
+</aside>
+
+</section>
+<section id="slide-orge8b86c1">
+<h4 id="orge8b86c1">&nbsp;</h4>
+<p>
+visitInsn - 在 PassthroughDataflowMethodVisitor 中处理返回指令，记录栈顶的污点信息
+</p>
+<div class="org-src-container">
+
+<pre><code class="java" >public void visitInsn(int opcode) {
+    switch(opcode) {
+        case Opcodes.IRETURN:
+        case Opcodes.FRETURN:
+        case Opcodes.ARETURN:
+            returnTaint.addAll(getStackTaint(0));
+            break;
+        case Opcodes.LRETURN:
+        case Opcodes.DRETURN:
+            returnTaint.addAll(getStackTaint(1));
+            break;
+        ...
+    }
+    super.visitInsn(opcode);
+}
+</code></pre>
+</div>
+
+</section>
+<section id="slide-orga5a33d7">
+<h3 id="orga5a33d7">TaintTrackingMethodVisitor</h3>
+<ul>
+<li>SavedVariableState：模拟操作数栈和局部变量表</li>
+<li>PASSTHROUGH<sub>DATAFLOW</sub>：标准库部分方法的数据流信息</li>
+<li>mergeGotoState：合并不同分支的污点标记</li>
+<li>couldBeSerialized：判断当前类能不能序列化（比如实现 Serializable 接口）</li>
+
+</ul>
+
+<p>
+源码：<a href="https://github.com/JackOfMostTrades/gadgetinspector/blob/master/src/main/java/gadgetinspector/TaintTrackingMethodVisitor.java">TaintTrackingMethodVisitor.java</a>
+</p>
+
+</section>
+<section id="slide-org4fcf592">
+<h3 id="org4fcf592">CallGraphDiscovery</h3>
+<p>
+分析方法参数对其调用的方法的参数的影响
+</p>
+
+<div id="org4c3828e" class="figure">
+<p><img src="img/step3.png" alt="step3.png" width="600" />
+</p>
+</div>
+
+</section>
+<section id="slide-org497962c">
+<h4 id="org497962c">具体实现</h4>
+<div class="org-src-container">
+
+<pre><code class="java" >public void discover(final ClassResourceEnumerator classResourceEnumerator, GIConfig config) throws IOException {
+    ...
+    Map&lt;MethodReference.Handle, Set&lt;Integer&gt;&gt; passthroughDataflow = PassthroughDiscovery.load();
+    SerializableDecider serializableDecider = config.getSerializableDecider(methodMap, inheritanceMap);
+    for (ClassResourceEnumerator.ClassResource classResource : classResourceEnumerator.getAllClasses()) {
+        try (InputStream in = classResource.getInputStream()) {
+            ClassReader cr = new ClassReader(in);
+            try {
+                cr.accept(new ModelGeneratorClassVisitor(...), ClassReader.EXPAND_FRAMES);
+            } catch (Exception e) {
+                ...
+            }
+        }
+    }
+}
+</code></pre>
+</div>
+
+</section>
+<section id="slide-org2ad0f3c">
+<h4 id="org2ad0f3c">ModelGeneratorMethodVisitor</h4>
+<p>
+继承 TaintTrackingMethodVisitor&lt;String&gt;，实现了以下方法：
+</p>
+<ul>
+<li>visitCode：初始化模拟操作数栈和局部变量表</li>
+<li><p>
+visitFieldInsn：和之前的流程差不多，但是会记录被污染的属性的名字
+</p>
+<div class="org-src-container">
+
+<pre><code class="java" >  if (!Boolean.TRUE.equals(isTransient)) {
+      for (String s : getStackTaint(0)) {
+          newTaint.add(s + "." + name);
+      }
+  }
+</code></pre>
+</div></li>
+<li>visitMethodInsn：处理方法访问过程的污点传播</li>
+
+</ul>
+
+</section>
+<section id="slide-orgeedd7f2">
+<h4 id="orgeedd7f2">&nbsp;</h4>
+<p>
+visitMethodInsn - 分析外层方法参数和当前方法参数的关系，构建 GraphCall 实例
+</p>
+<div class="org-src-container">
+
+<pre><code class="java" data-line-numbers="|10|15,16|18,19|23-29" data-org-id="code-animation">public void visitMethodInsn(int opcode, String owner, String name, String desc, boolean itf) {
+    ...
+    switch (opcode) {
+        ...
+        case Opcodes.INVOKEVIRTUAL:
+            int stackIndex = 0;
+            for (int i = 0; i &lt; argTypes.length; i++) {
+                int argIndex = argTypes.length-1-i;
+                Type type = argTypes[argIndex];
+                Set&lt;String&gt; taint = getStackTaint(stackIndex);
+                if (taint.size() &gt; 0) {
+                    for (String argSrc : taint) {
+                        ...
+                        if (dotIndex == -1) {
+                            srcArgIndex = Integer.parseInt(argSrc.substring(3));
+                            srcArgPath = null;
+                        } else {
+                            srcArgIndex = Integer.parseInt(argSrc.substring(3, dotIndex));
+                            srcArgPath = argSrc.substring(dotIndex+1);
+                        }
+
+                        discoveredCalls.add(
+                            new GraphCall(
+                                new MethodReference.Handle(/* caller */),
+                                new MethodReference.Handle(/* target */),
+                                srcArgIndex,
+                                srcArgPath,
+                                argIndex
+                            )
+                        );
+                    }
+                }
+            }
+        ...
+    }
+    super.visitMethodInsn(opcode, owner, name, desc, itf);
+}
+</code></pre>
+</div>
+
+</section>
+<section id="slide-org93e7211">
+<h3 id="org93e7211">SourceDiscovery</h3>
+<p>
+这是一个抽象类，根据不同实现来选择污染源，比如在默认配置中会将 finalize、readObject、hashCode 等方法视为 source，主要取决于已知利用链
+</p>
+<div class="org-src-container">
+
+<pre><code class="java" data-line-numbers="|3,11" data-org-id="code-animation">public void discover(...) {
+    for (MethodReference.Handle method : methodMap.keySet()) {
+        if (Boolean.TRUE.equals(serializableDecider.apply(method.getClassReference()))) {
+            if (method.getName().equals("finalize") &amp;&amp; method.getDesc().equals("()V")) {
+                addDiscoveredSource(new Source(method, 0));
+            }
+        }
+    }
+    for (MethodReference.Handle method : methodMap.keySet()) {
+        if (...) {
+            if (method.getName().equals("readObject") &amp;&amp; method.getDesc().equals("(Ljava/io/ObjectInputStream;)V")) {
+                addDiscoveredSource(new Source(method, 1));
+            }
+        }
+    }
+    ...
+}
+</code></pre>
+</div>
+
+</section>
+<section id="slide-org670bdf8">
+<h3 id="org670bdf8">GadgetChainDiscovery</h3>
+<p>
+根据已有的数据挖掘利用链
+</p>
+
+<ol>
+<li>假设所有（可序列化）子类的重写方法都可能执行</li>
+<li>汇聚点（sink）依赖于已知的危险方法</li>
+
+</ol>
+
+</section>
+<section id="slide-org314de98" data-auto-animate>
+<h4 id="org314de98">&nbsp;</h4>
+<div class="org-src-container">
+
+<pre><code class="java" data-line-numbers="" data-org-id="code-animation">public class GadgetChainDiscovery {
+    public void discover() throws Exception {
+        Map&lt;MethodReference.Handle, MethodReference&gt; methodMap = DataLoader.loadMethods();
+        InheritanceMap inheritanceMap = InheritanceMap.load();
+        Map&lt;MethodReference.Handle, Set&lt;MethodReference.Handle&gt;&gt; methodImplMap = InheritanceDeriver.getAllMethodImplementations(
+                inheritanceMap, methodMap);
+
+        try (Writer writer = Files.newBufferedWriter(Paths.get("methodimpl.dat"))) {
+            /* write to file */
+        }
+
+        Map&lt;MethodReference.Handle, Set&lt;GraphCall&gt;&gt; graphCallMap = new HashMap&lt;&gt;();
+        for (GraphCall graphCall : DataLoader.loadData(Paths.get("callgraph.dat"), new GraphCall.Factory())) {
+            /* group by caller  */
+        }
+        ...
+    }
+
+    private static class GadgetChain {...}
+
+    private static class GadgetChainLink {...}
+
+    private boolean isSink(method, argIndex, inheritanceMap) {...}
+}
+</code></pre>
+</div>
+
+</section>
+<section id="slide-org539d7ca" data-auto-animate>
+<h4 id="org539d7ca">&nbsp;</h4>
+<div class="org-src-container">
+
+<pre><code class="java" data-line-numbers="|13|16" data-org-id="code-animation">public class GadgetChainDiscovery {
+    public void discover() throws Exception {
+        ...
+        Set&lt;GadgetChain&gt; discoveredGadgets = new HashSet&lt;&gt;();
+        while (methodsToExplore.size() &gt; 0) {
+            ...
+            GadgetChain chain = methodsToExplore.pop();
+            GadgetChainLink lastLink = chain.links.get(chain.links.size()-1);
+            Set&lt;GraphCall&gt; methodCalls = graphCallMap.get(lastLink.method);
+            if (methodCalls != null) {
+                for (GraphCall graphCall : methodCalls) {
+                    ...
+                    for (MethodReference.Handle methodImpl : allImpls) {
+                        ...
+                        GadgetChain newChain = new GadgetChain(chain, newLink);
+                        if (isSink(methodImpl, graphCall.getTargetArgIndex(), inheritanceMap)) {
+                            discoveredGadgets.add(newChain);
+                        } else {
+                            methodsToExplore.add(newChain);
+                            exploredMethods.add(newLink);
+                        }
+                    }
+                }
+            }
+        }
+        ...
+    }
+
+    private static class GadgetChain {...}
+
+    private static class GadgetChainLink {...}
+
+    private boolean isSink(method, argIndex, inheritanceMap) {...}
+}
+</code></pre>
+</div>
+
+</section>
+<section id="slide-orgd50e5c6" data-auto-animate>
+<h4 id="orgd50e5c6">&nbsp;</h4>
+<div class="org-src-container">
+
+<pre><code class="java" data-line-numbers="|9,10|13,14|17,18" data-org-id="code-animation">public class GadgetChainDiscovery {
+    public void discover() throws Exception {...}
+
+    private static class GadgetChain {...}
+
+    private static class GadgetChainLink {...}
+
+    private boolean isSink(MethodReference.Handle method, int argIndex, InheritanceMap inheritanceMap) {
+        if (method.getClassReference().getName().equals("java/io/FileInputStream")
+                &amp;&amp; method.getName().equals("&lt;init&gt;")) {
+            return true;
+        }
+        if (method.getClassReference().getName().equals("java/io/FileOutputStream")
+                &amp;&amp; method.getName().equals("&lt;init&gt;")) {
+            return true;
+        }
+        if (method.getClassReference().getName().equals("java/lang/Runtime")
+                &amp;&amp; method.getName().equals("exec")) {
+            return true;
+        }
+        ...
+    }
+}
+</code></pre>
+</div>
+
+</section>
+<section id="slide-org3c599d7">
+<h4 id="org3c599d7">输出格式</h4>
+<div class="org-src-container">
+
+<pre><code class="text" >net/sf/jasperreports/charts/design/JRDesignPieDataset.readObject(Ljava/io/ObjectInputStream;)V (1)
+  org/apache/commons/collections/FastArrayList.add(Ljava/lang/Object;)Z (0)
+  java/util/ArrayList.clone()Ljava/lang/Object; (0)
+  org/jfree/data/KeyToGroupMap.clone()Ljava/lang/Object; (0)
+  org/jfree/data/KeyToGroupMap.clone(Ljava/lang/Object;)Ljava/lang/Object; (0)
+  java/lang/reflect/Method.invoke(Ljava/lang/Object;[Ljava/lang/Object;)Ljava/lang/Object; (0)
+</code></pre>
+</div>
+
+</section>
+</section>
+<section>
+<section id="slide-org6557cd4">
+<h2 id="org6557cd4">&nbsp;</h2>
+
+<div id="org473ece5" class="figure">
+<p><img src="img/Thank-you-pinned-note.svg" alt="Thank-you-pinned-note.svg" class="org-svg" width="500" />
+</p>
+</div>
+</section>
+</section>
+</div>
+</div>
+<script src="../reveal.js/dist/reveal.js"></script>
+<script src="../reveal.js/plugin/zoom/zoom.js"></script>
+<script src="../reveal.js/plugin/notes/notes.js"></script>
+<script src="../reveal.js/plugin/highlight/highlight.js"></script>
+<script src="../script.js"></script>
+<script>
+// Full list of configuration options available here:
+// https://github.com/hakimel/reveal.js#configuration
+Reveal.initialize({
+
+controls: false,
+progress: true,
+history: false,
+center: true,
+slideNumber: false,
+rollingLinks: false,
+keyboard: true,
+mouseWheel: false,
+fragmentInURL: false,
+hashOneBasedIndex: false,
+pdfSeparateFragments: true,
+overview: true,
+
+transition: 'convex',
+transitionSpeed: 'default',
+
+// Plugins with reveal.js 4.x
+plugins: [ RevealZoom, RevealNotes, RevealHighlight ],
+
+// Optional libraries used to extend reveal.js
+dependencies: [
+]
+
+});
+</script>
+</body>
+</html>

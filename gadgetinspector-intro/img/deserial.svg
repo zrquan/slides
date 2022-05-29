@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" contentScriptType="application/ecmascript" contentStyleType="text/css" height="537px" preserveAspectRatio="none" style="width:768px;height:537px;background:#00000000;" version="1.1" viewBox="0 0 768 537" width="768px" zoomAndPan="magnify"><defs><filter height="300%" id="f1v6olv8sd3x9n" width="300%" x="-1" y="-1"><feGaussianBlur result="blurOut" stdDeviation="2.0"/><feColorMatrix in="blurOut" result="blurOut2" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .4 0"/><feOffset dx="4.0" dy="4.0" in="blurOut2" result="blurOut3"/><feBlend in="SourceGraphic" in2="blurOut3" mode="normal"/></filter></defs><g><line style="stroke:#A80036;stroke-width:1.0;stroke-dasharray:5.0,5.0;" x1="112" x2="112" y1="43.1201" y2="491.436"/><line style="stroke:#A80036;stroke-width:1.0;stroke-dasharray:5.0,5.0;" x1="334" x2="334" y1="43.1201" y2="491.436"/><line style="stroke:#A80036;stroke-width:1.0;stroke-dasharray:5.0,5.0;" x1="526" x2="526" y1="43.1201" y2="491.436"/><line style="stroke:#A80036;stroke-width:1.0;stroke-dasharray:5.0,5.0;" x1="672" x2="672" y1="43.1201" y2="491.436"/><rect fill="#FEFECE" filter="url(#f1v6olv8sd3x9n)" height="33.1201" style="stroke:#A80036;stroke-width:1.5;" width="131" x="45" y="5"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="117" x="52" y="28.0439">ObjectInputStream</text><rect fill="#FEFECE" filter="url(#f1v6olv8sd3x9n)" height="33.1201" style="stroke:#A80036;stroke-width:1.5;" width="131" x="45" y="490.436"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="117" x="52" y="513.48">ObjectInputStream</text><rect fill="#FEFECE" filter="url(#f1v6olv8sd3x9n)" height="33.1201" style="stroke:#A80036;stroke-width:1.5;" width="125" x="270" y="5"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="111" x="277" y="28.0439">Serializable Class</text><rect fill="#FEFECE" filter="url(#f1v6olv8sd3x9n)" height="33.1201" style="stroke:#A80036;stroke-width:1.5;" width="125" x="270" y="490.436"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="111" x="277" y="513.48">Serializable Class</text><rect fill="#FEFECE" filter="url(#f1v6olv8sd3x9n)" height="33.1201" style="stroke:#A80036;stroke-width:1.5;" width="70" x="489" y="5"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="56" x="496" y="28.0439">应用代码</text><rect fill="#FEFECE" filter="url(#f1v6olv8sd3x9n)" height="33.1201" style="stroke:#A80036;stroke-width:1.5;" width="70" x="489" y="490.436"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="56" x="496" y="513.48">应用代码</text><rect fill="#FEFECE" filter="url(#f1v6olv8sd3x9n)" height="33.1201" style="stroke:#A80036;stroke-width:1.5;" width="35" x="653" y="5"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="21" x="660" y="28.0439">GC</text><rect fill="#FEFECE" filter="url(#f1v6olv8sd3x9n)" height="33.1201" style="stroke:#A80036;stroke-width:1.5;" width="35" x="653" y="490.436"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="21" x="660" y="513.48">GC</text><path d="M395,58.1201 L395,121.1201 L653,121.1201 L653,68.1201 L643,58.1201 L395,58.1201 " fill="#FBFB77" filter="url(#f1v6olv8sd3x9n)" style="stroke:#A80036;stroke-width:1.0;"/><path d="M643,58.1201 L643,68.1201 L653,68.1201 L643,58.1201 " fill="#FBFB77" style="stroke:#A80036;stroke-width:1.0;"/><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacing" textLength="106" x="401" y="78.0181">1. 获取序列化数据</text><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacing" textLength="196" x="401" y="95.7725">2. 初始化 ObjectInputStream 实例</text><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacing" textLength="237" x="401" y="113.5269">3. 从输入流读取 object：ois.readObject()</text><polygon fill="#A80036" points="123.5,132.3833,113.5,136.3833,123.5,140.3833,119.5,136.3833" style="stroke:#A80036;stroke-width:1.0;"/><line style="stroke:#A80036;stroke-width:1.0;stroke-dasharray:2.0,2.0;" x1="117.5" x2="525" y1="136.3833" y2="136.3833"/><path d="M9,149.3833 L9,194.3833 L211,194.3833 L211,159.3833 L201,149.3833 L9,149.3833 " fill="#FBFB77" filter="url(#f1v6olv8sd3x9n)" style="stroke:#A80036;stroke-width:1.0;"/><path d="M201,149.3833 L201,159.3833 L211,159.3833 L201,149.3833 " fill="#FBFB77" style="stroke:#A80036;stroke-width:1.0;"/><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacing" textLength="181" x="15" y="169.2813">4. 解析 Java 类：resolveClass()</text><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacing" textLength="158" x="15" y="187.0356">5. 反序列化输入流中的对象</text><path d="M224,208.8921 L224,342.8921 L440,342.8921 L440,218.8921 L430,208.8921 L224,208.8921 " fill="#FBFB77" filter="url(#f1v6olv8sd3x9n)" style="stroke:#A80036;stroke-width:1.0;"/><path d="M430,208.8921 L430,218.8921 L440,218.8921 L430,208.8921 " fill="#FBFB77" style="stroke:#A80036;stroke-width:1.0;"/><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacing" textLength="93" x="230" y="228.79">6. 恢复成员变量</text><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacing" textLength="179" x="246" y="246.5444">readObject(ObjectInputStream)</text><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacing" textLength="114" x="246" y="264.2988">readObjectNoData()</text><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacing" textLength="184" x="230" y="282.0532">7. 替换反序列化的对象（单例）</text><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacing" textLength="78" x="246" y="299.8076">readResolve()</text><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacing" textLength="93" x="230" y="317.562">8. 校验（可选）</text><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacing" textLength="89" x="246" y="335.3164">validateObject()</text><polygon fill="#A80036" points="514,354.1729,524,358.1729,514,362.1729,518,358.1729" style="stroke:#A80036;stroke-width:1.0;"/><line style="stroke:#A80036;stroke-width:1.0;stroke-dasharray:2.0,2.0;" x1="112.5" x2="520" y1="358.1729" y2="358.1729"/><path d="M434,371.1729 L434,416.1729 L613,416.1729 L613,381.1729 L603,371.1729 L434,371.1729 " fill="#FBFB77" filter="url(#f1v6olv8sd3x9n)" style="stroke:#A80036;stroke-width:1.0;"/><path d="M603,371.1729 L603,381.1729 L613,381.1729 L603,371.1729 " fill="#FBFB77" style="stroke:#A80036;stroke-width:1.0;"/><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacing" textLength="158" x="440" y="391.0708">9. 对象强制转型为目标类型</text><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacing" textLength="74" x="440" y="408.8252">10. 使用对象</text><path d="M581,430.6816 L581,457.6816 L759,457.6816 L759,440.6816 L749,430.6816 L581,430.6816 " fill="#FBFB77" filter="url(#f1v6olv8sd3x9n)" style="stroke:#A80036;stroke-width:1.0;"/><path d="M749,430.6816 L749,440.6816 L759,440.6816 L749,430.6816 " fill="#FBFB77" style="stroke:#A80036;stroke-width:1.0;"/><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacing" textLength="157" x="587" y="450.5796">GC 调用 finalize() 释放内存</text><polygon fill="#A80036" points="345.5,469.436,335.5,473.436,345.5,477.436,341.5,473.436" style="stroke:#A80036;stroke-width:1.0;"/><line style="stroke:#A80036;stroke-width:1.0;stroke-dasharray:2.0,2.0;" x1="339.5" x2="671.5" y1="473.436" y2="473.436"/><!--MD5=[2af88dfcc50bb479334709c4db5407bb]
+@startuml
+skinparam ParticipantPadding 40
+skinparam backgroundcolor transparent
+
+participant ObjectInputStream
+participant "Serializable Class"
+participant 应用代码
+participant GC
+
+note over 应用代码
+    1. 获取序列化数据
+    2. 初始化 ObjectInputStream 实例
+    3. 从输入流读取 object：ois.readObject()
+end note
+
+应用代码 - -> ObjectInputStream
+
+note over ObjectInputStream
+    4. 解析 Java 类：resolveClass()
+    5. 反序列化输入流中的对象
+end note
+
+note over "Serializable Class"
+    6. 恢复成员变量
+        readObject(ObjectInputStream)
+        readObjectNoData()
+    7. 替换反序列化的对象（单例）
+        readResolve()
+    8. 校验（可选）
+        validateObject()
+end note
+
+ObjectInputStream - -> 应用代码
+
+note over 应用代码
+    9. 对象强制转型为目标类型
+    10. 使用对象
+end note
+
+note over GC
+    GC 调用 finalize() 释放内存
+end note
+
+GC - -> "Serializable Class"
+@enduml
+
+PlantUML version 1.2022.0(Wed Jan 12 00:16:42 CST 2022)
+(GPL source distribution)
+Java Runtime: Java(TM) SE Runtime Environment
+JVM: Java HotSpot(TM) 64-Bit Server VM
+Default Encoding: GBK
+Language: zh
+Country: CN
+--></g></svg>
