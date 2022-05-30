@@ -21,6 +21,10 @@ Repo: https://github.com/JackOfMostTrades/gadgetinspector
 #+begin_src plantuml :file img/deserial.svg
 skinparam ParticipantPadding 40
 skinparam backgroundcolor transparent
+skinparam sequence {
+    ArrowColor white
+    LifeLineBorderColor white
+}
 
 participant ObjectInputStream
 participant "Serializable Class"
@@ -40,7 +44,7 @@ note over ObjectInputStream
     5. 反序列化输入流中的对象
 end note
 
-note over "Serializable Class"
+note over "Serializable Class" #FFAAAA
     6. 恢复成员变量
         readObject(ObjectInputStream)
         readObjectNoData()
@@ -57,14 +61,14 @@ note over 应用代码
     10. 使用对象
 end note
 
-note over GC
+note over GC #FFAAAA
     GC 调用 finalize() 释放内存
 end note
 
 GC --> "Serializable Class"
 #+end_src
 
-#+ATTR_HTML: :width 600
+#+ATTR_HTML: :width 800
 #+RESULTS:
 [[file:img/deserial.svg]]
 
@@ -332,7 +336,7 @@ private static void getAllParents(...) {
 
 ** PassthroughDiscovery
 分析方法的返回值受到哪些参数的影响
-#+ATTR_HTML: :width 600
+#+ATTR_HTML: :width 800
 [[file:img/step2.png]]
 
 *** 具体实现
@@ -601,7 +605,8 @@ public void visitInsn(int opcode) {
 
 ** TaintTrackingMethodVisitor
 - SavedVariableState：模拟操作数栈和局部变量表
-- PASSTHROUGH_DATAFLOW：标准库部分方法的数据流信息
+- PassthroughDataflow：标准库部分方法，直接给出结果
+- visitMethodInsn：模拟方法调用处理特殊方法和集合类实例
 - mergeGotoState：合并不同分支的污点标记
 - couldBeSerialized：判断当前类能不能序列化（比如实现 Serializable 接口）
 
@@ -609,7 +614,7 @@ public void visitInsn(int opcode) {
 
 ** CallGraphDiscovery
 分析方法参数对其调用的方法的参数的影响
-#+ATTR_HTML: :width 600
+#+ATTR_HTML: :width 800
 [[file:img/step3.png]]
 
 *** 具体实现

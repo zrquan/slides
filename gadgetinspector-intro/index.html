@@ -18,13 +18,13 @@
 <div class="reveal">
 <div class="slides">
 <section id="sec-title-slide">
-<h1 class="title">GadgetInspector 源码浅析</h1><h2 class="author">4shen0ne</h2><p class="date">Created: 2022-05-29 Sun 23:56</p>
+<h1 class="title">GadgetInspector 源码浅析</h1><h2 class="author">4shen0ne</h2><p class="date">Created: 2022-05-30 Mon 14:50</p>
 </section>
 
 
 <section>
-<section id="slide-org3e88a64">
-<h2 id="org3e88a64">简介</h2>
+<section id="slide-org60fb060">
+<h2 id="org60fb060">简介</h2>
 <p>
 GadgetInspector 是 Black Hat 2018 上 Netflix 安全团队展示的一个 Java 静态分析工具，用于挖掘 Java 反序列化利用链。其核心思路是利用 ASM 模拟 JVM 运行时操作数栈和局部变量表的修改情况，实现代码执行过程中的污点路径分析，而不需要去实际执行字节码
 </p>
@@ -36,20 +36,20 @@ Repo: <a href="https://github.com/JackOfMostTrades/gadgetinspector">https://gith
 </section>
 </section>
 <section>
-<section id="slide-org2587c7e">
-<h2 id="org2587c7e">前置知识</h2>
-<div class="outline-text-2" id="text-org2587c7e">
+<section id="slide-org5190e8f">
+<h2 id="org5190e8f">前置知识</h2>
+<div class="outline-text-2" id="text-org5190e8f">
 </div>
 </section>
-<section id="slide-org115ff1a">
-<h3 id="org115ff1a">Java 反序列化漏洞</h3>
+<section id="slide-org00f9ac1">
+<h3 id="org00f9ac1">Java 反序列化漏洞</h3>
 <p>
 攻击者通过控制输入流中的数据，可以控制目标代码的行为
 </p>
 
 
-<div id="org830c163" class="figure">
-<p><img src="img/deserial.svg" alt="deserial.svg" class="org-svg" width="600" />
+<div id="orgf6cdc91" class="figure">
+<p><img src="img/deserial.svg" alt="deserial.svg" class="org-svg" width="800" />
 </p>
 </div>
 
@@ -61,8 +61,8 @@ Object#finalize 方法在 GC 回收一个对象时执行，利用其延后 sink 
 </aside>
 
 </section>
-<section id="slide-org650db06">
-<h3 id="org650db06">污点分析</h3>
+<section id="slide-orga85f446">
+<h3 id="orga85f446">污点分析</h3>
 <ul>
 <li>一种跟踪并分析危险数据（污点）在程序中流动的技术</li>
 <li>污染源 Source, 汇聚处 Sink, 污点处理 Sanitizers</li>
@@ -71,8 +71,8 @@ Object#finalize 方法在 GC 回收一个对象时执行，利用其延后 sink 
 </ul>
 
 </section>
-<section id="slide-org3cd82bf" data-auto-animate>
-<h4 id="org3cd82bf">基于数据流（显式）</h4>
+<section id="slide-org70c73c7" data-auto-animate>
+<h4 id="org70c73c7">基于数据流（显式）</h4>
 <div class="org-src-container">
 
 <pre><code class="java" data-line-numbers data-org-id="code-animation">void foo() {
@@ -85,8 +85,8 @@ Object#finalize 方法在 GC 回收一个对象时执行，利用其延后 sink 
 </div>
 
 </section>
-<section id="slide-orgf298950" data-auto-animate>
-<h4 id="orgf298950">基于依赖关系（隐式）</h4>
+<section id="slide-org4b8a13c" data-auto-animate>
+<h4 id="org4b8a13c">基于依赖关系（隐式）</h4>
 <div class="org-src-container">
 
 <pre><code class="java" data-line-numbers="" data-org-id="code-animation">void foo() {
@@ -101,8 +101,8 @@ Object#finalize 方法在 GC 回收一个对象时执行，利用其延后 sink 
 </div>
 
 </section>
-<section id="slide-orgf969007">
-<h3 id="orgf969007">ASM</h3>
+<section id="slide-org36e8792">
+<h3 id="org36e8792">ASM</h3>
 <p>
 一个 Java Class 字节码操作库，使用访问者设计模式。开发者通过实现 ASM 提供的 API 来操控 Java Class 结构
 </p>
@@ -117,14 +117,14 @@ visit [ visitSource ] [ visitModule ][ visitNestHost ][ visitOuterClass ] ( visi
 </blockquote>
 
 </section>
-<section id="slide-orgb42d206">
-<h3 id="orgb42d206">JVM</h3>
+<section id="slide-org908c298">
+<h3 id="org908c298">JVM</h3>
 <p>
 虚拟机栈帧结构，GadgetInspector 通过操作数栈和局部变量表传递污点标记
 </p>
 
 
-<div id="org95760bc" class="figure">
+<div id="org21d4fb9" class="figure">
 <p><img src="img/jvm-stack.svg" alt="jvm-stack.svg" class="org-svg" />
 </p>
 </div>
@@ -132,13 +132,13 @@ visit [ visitSource ] [ visitModule ][ visitNestHost ][ visitOuterClass ] ( visi
 </section>
 </section>
 <section>
-<section id="slide-orgb6843d8">
-<h2 id="orgb6843d8">整体流程</h2>
-<div class="outline-text-2" id="text-orgb6843d8">
+<section id="slide-org2adb6dc">
+<h2 id="org2adb6dc">整体流程</h2>
+<div class="outline-text-2" id="text-org2adb6dc">
 </div>
 </section>
-<section id="slide-orge3d7a33" data-auto-animate>
-<h3 id="orge3d7a33">枚举所有类和方法的层级关系</h3>
+<section id="slide-org1f24e62" data-auto-animate>
+<h3 id="org1f24e62">枚举所有类和方法的层级关系</h3>
 <div class="org-src-container">
 
 <pre><code class="java" data-line-numbers="" data-org-id="code-animation">public class GadgetInspector {
@@ -156,8 +156,8 @@ visit [ visitSource ] [ visitModule ][ visitNestHost ][ visitOuterClass ] ( visi
 </div>
 
 </section>
-<section id="slide-org3139e41" data-auto-animate>
-<h3 id="org3139e41">分析单个方法的污点传播</h3>
+<section id="slide-orgc74e534" data-auto-animate>
+<h3 id="orgc74e534">分析单个方法的污点传播</h3>
 <div class="org-src-container">
 
 <pre><code class="java" data-line-numbers="" data-org-id="code-animation">public class GadgetInspector {
@@ -180,8 +180,8 @@ visit [ visitSource ] [ visitModule ][ visitNestHost ][ visitOuterClass ] ( visi
 </div>
 
 </section>
-<section id="slide-org4527c59" data-auto-animate>
-<h3 id="org4527c59">分析调用路径的污点传播</h3>
+<section id="slide-org94c7089" data-auto-animate>
+<h3 id="org94c7089">分析调用路径的污点传播</h3>
 <div class="org-src-container">
 
 <pre><code class="java" data-line-numbers="" data-org-id="code-animation">public class GadgetInspector {
@@ -204,8 +204,8 @@ visit [ visitSource ] [ visitModule ][ visitNestHost ][ visitOuterClass ] ( visi
 </div>
 
 </section>
-<section id="slide-orgff3bcb8" data-auto-animate>
-<h3 id="orgff3bcb8">枚举 Sources</h3>
+<section id="slide-orgcc4589a" data-auto-animate>
+<h3 id="orgcc4589a">枚举 Sources</h3>
 <div class="org-src-container">
 
 <pre><code class="java" data-line-numbers="" data-org-id="code-animation">public class GadgetInspector {
@@ -228,8 +228,8 @@ visit [ visitSource ] [ visitModule ][ visitNestHost ][ visitOuterClass ] ( visi
 </div>
 
 </section>
-<section id="slide-orgafe15bc" data-auto-animate>
-<h3 id="orgafe15bc">挖掘利用链</h3>
+<section id="slide-org0dd6362" data-auto-animate>
+<h3 id="org0dd6362">挖掘利用链</h3>
 <div class="org-src-container">
 
 <pre><code class="java" data-line-numbers="" data-org-id="code-animation">public class GadgetInspector {
@@ -252,13 +252,13 @@ visit [ visitSource ] [ visitModule ][ visitNestHost ][ visitOuterClass ] ( visi
 </section>
 </section>
 <section>
-<section id="slide-orgb81a289">
-<h2 id="orgb81a289">源码分析</h2>
-<div class="outline-text-2" id="text-orgb81a289">
+<section id="slide-orgb19a82d">
+<h2 id="orgb19a82d">源码分析</h2>
+<div class="outline-text-2" id="text-orgb19a82d">
 </div>
 </section>
-<section id="slide-orgc189f2a">
-<h3 id="orgc189f2a">初始化 URLClassLoader</h3>
+<section id="slide-org0ee7e3e">
+<h3 id="org0ee7e3e">初始化 URLClassLoader</h3>
 <p>
 将目标 jar 或 war（WEB-INF/classes &amp; WEB-INF/lib）资源添加到 classpath, 后续用来加载类
 </p>
@@ -280,8 +280,8 @@ final ClassResourceEnumerator classResourceEnumerator = new ClassResourceEnumera
 </div>
 
 </section>
-<section id="slide-orgfccd166">
-<h3 id="orgfccd166">初始化 ClassResourceEnumerator</h3>
+<section id="slide-org14e6410">
+<h3 id="org14e6410">初始化 ClassResourceEnumerator</h3>
 <ul>
 <li>ClassResourceEnumerator#getAllClasses</li>
 <li>ClassResourceEnumerator$ClassLoaderClassResource#getInputStream</li>
@@ -289,8 +289,8 @@ final ClassResourceEnumerator classResourceEnumerator = new ClassResourceEnumera
 </ul>
 
 </section>
-<section id="slide-orga753650">
-<h4 id="orga753650">如何获取运行时类？</h4>
+<section id="slide-org15cbe72">
+<h4 id="org15cbe72">如何获取运行时类？</h4>
 <p>
 通过 String.class 定位 rt.jar
 </p>
@@ -336,8 +336,8 @@ Files.walk(fs.getPath("/")).forEach(p -&gt; {
 </div>
 
 </section>
-<section id="slide-org18bb355">
-<h3 id="org18bb355">MethodDiscovery</h3>
+<section id="slide-org42cf9d4">
+<h3 id="org42cf9d4">MethodDiscovery</h3>
 <p>
 通过 ClassResourceEnumerator 枚举每个类并获取输入流，利用 ASM 记录类、属性、方法的信息
 </p>
@@ -355,8 +355,8 @@ Files.walk(fs.getPath("/")).forEach(p -&gt; {
 </ul>
 
 </section>
-<section id="slide-orgc761a6c">
-<h4 id="orgc761a6c">InheritanceDeriver</h4>
+<section id="slide-org35b5e2a">
+<h4 id="org35b5e2a">InheritanceDeriver</h4>
 <p>
 通过递归枚举父类和所有接口，记录类的继承链
 </p>
@@ -390,20 +390,20 @@ Files.walk(fs.getPath("/")).forEach(p -&gt; {
 </div>
 
 </section>
-<section id="slide-orgf729f76">
-<h3 id="orgf729f76">PassthroughDiscovery</h3>
+<section id="slide-org0cdd880">
+<h3 id="org0cdd880">PassthroughDiscovery</h3>
 <p>
 分析方法的返回值受到哪些参数的影响
 </p>
 
-<div id="orgaf3ffe6" class="figure">
-<p><img src="img/step2.png" alt="step2.png" width="600" />
+<div id="orge4a2908" class="figure">
+<p><img src="img/step2.png" alt="step2.png" width="800" />
 </p>
 </div>
 
 </section>
-<section id="slide-org4c0c5b0">
-<h4 id="org4c0c5b0">具体实现</h4>
+<section id="slide-org1139406">
+<h4 id="org1139406">具体实现</h4>
 <ol>
 <li>拓扑逆排序，即完整分析一条调用链后，将调用链的排序反转</li>
 <li>分析每个方法的参数和返回值的污染关系(通过 PassthroughDataflowMethodVisitor 实现)</li>
@@ -440,8 +440,8 @@ methodCalls: Key =&gt; 当前方法，Value =&gt; Key 所调用的方法集合
 </aside>
 
 </section>
-<section id="slide-org313a0b6">
-<h4 id="org313a0b6">逆拓扑排序（DFS 实现）</h4>
+<section id="slide-org7865641">
+<h4 id="org7865641">逆拓扑排序（DFS 实现）</h4>
 <p>
 拓扑排序是一个有向无环图的所有顶点的线性序列，在这里表示所有方法的调用路径，而逆拓扑排序则是其逆序
 </p>
@@ -485,8 +485,8 @@ PassthroughDiscovery#dfsTsort 通过栈结构和深度优先策略实现逆拓�
 </aside>
 
 </section>
-<section id="slide-org24c65e9">
-<h4 id="org24c65e9">PassthroughDataflowMethodVisitor</h4>
+<section id="slide-org6d955ea">
+<h4 id="org6d955ea">PassthroughDataflowMethodVisitor</h4>
 <p>
 继承 TaintTrackingMethodVisitor&lt;Integer&gt;，实现了以下方法：
 </p>
@@ -499,8 +499,8 @@ PassthroughDiscovery#dfsTsort 通过栈结构和深度优先策略实现逆拓�
 </ul>
 
 </section>
-<section id="slide-orgeb76335">
-<h4 id="orgeb76335">&nbsp;</h4>
+<section id="slide-orgb176617">
+<h4 id="orgb176617">&nbsp;</h4>
 <p>
 visitCode - 表示访问当前方法，将参数出栈保存到局部变量表
 </p>
@@ -525,8 +525,8 @@ visitCode - 表示访问当前方法，将参数出栈保存到局部变量表
 </div>
 
 </section>
-<section id="slide-orgbf05824" data-auto-animate>
-<h4 id="orgbf05824">&nbsp;</h4>
+<section id="slide-org30b7f3d" data-auto-animate>
+<h4 id="org30b7f3d">&nbsp;</h4>
 <p>
 visitFieldInsn - 表示访问一个属性，如果用 transient 标识则视为安全（默认不会被序列化）
 </p>
@@ -570,8 +570,8 @@ GETFIELD: 访问属性时栈顶为类实例，访问完毕将属性入栈
 </aside>
 
 </section>
-<section id="slide-orgb1ef21e" data-auto-animate>
-<h4 id="orgb1ef21e">&nbsp;</h4>
+<section id="slide-org85952ea" data-auto-animate>
+<h4 id="org85952ea">&nbsp;</h4>
 <p>
 visitFieldInsn - 表示访问一个属性，如果用 transient 标识则视为安全（默认不会被序列化）
 </p>
@@ -605,8 +605,8 @@ visitFieldInsn - 表示访问一个属性，如果用 transient 标识则视为�
 </div>
 
 </section>
-<section id="slide-org29ee586" data-auto-animate>
-<h4 id="org29ee586">&nbsp;</h4>
+<section id="slide-org0c89301" data-auto-animate>
+<h4 id="org0c89301">&nbsp;</h4>
 <p>
 visitMethodInsn - 表示调用一个方法，此时参数已经依次入栈
 </p>
@@ -639,8 +639,8 @@ passthroughDataflow: 已经分析过的方法，因为经过逆拓扑排序，�
 </aside>
 
 </section>
-<section id="slide-orgfccbe3f" data-auto-animate>
-<h4 id="orgfccbe3f">&nbsp;</h4>
+<section id="slide-orgb949c60" data-auto-animate>
+<h4 id="orgb949c60">&nbsp;</h4>
 <p>
 visitMethodInsn - 表示调用一个方法，此时参数已经依次入栈
 </p>
@@ -696,8 +696,8 @@ visitMethodInsn - 表示调用一个方法，此时参数已经依次入栈
 </aside>
 
 </section>
-<section id="slide-orge8b86c1">
-<h4 id="orge8b86c1">&nbsp;</h4>
+<section id="slide-orgcd0d9a9">
+<h4 id="orgcd0d9a9">&nbsp;</h4>
 <p>
 visitInsn - 在 PassthroughDataflowMethodVisitor 中处理返回指令，记录栈顶的污点信息
 </p>
@@ -722,11 +722,12 @@ visitInsn - 在 PassthroughDataflowMethodVisitor 中处理返回指令，记录�
 </div>
 
 </section>
-<section id="slide-orga5a33d7">
-<h3 id="orga5a33d7">TaintTrackingMethodVisitor</h3>
+<section id="slide-orge8b6eea">
+<h3 id="orge8b6eea">TaintTrackingMethodVisitor</h3>
 <ul>
 <li>SavedVariableState：模拟操作数栈和局部变量表</li>
-<li>PASSTHROUGH<sub>DATAFLOW</sub>：标准库部分方法的数据流信息</li>
+<li>PassthroughDataflow：标准库部分方法，直接给出结果</li>
+<li>visitMethodInsn：模拟方法调用处理特殊方法和集合类实例</li>
 <li>mergeGotoState：合并不同分支的污点标记</li>
 <li>couldBeSerialized：判断当前类能不能序列化（比如实现 Serializable 接口）</li>
 
@@ -737,20 +738,20 @@ visitInsn - 在 PassthroughDataflowMethodVisitor 中处理返回指令，记录�
 </p>
 
 </section>
-<section id="slide-org4fcf592">
-<h3 id="org4fcf592">CallGraphDiscovery</h3>
+<section id="slide-org8cad30a">
+<h3 id="org8cad30a">CallGraphDiscovery</h3>
 <p>
 分析方法参数对其调用的方法的参数的影响
 </p>
 
-<div id="org4c3828e" class="figure">
-<p><img src="img/step3.png" alt="step3.png" width="600" />
+<div id="org1639d48" class="figure">
+<p><img src="img/step3.png" alt="step3.png" width="800" />
 </p>
 </div>
 
 </section>
-<section id="slide-org497962c">
-<h4 id="org497962c">具体实现</h4>
+<section id="slide-orgee992fd">
+<h4 id="orgee992fd">具体实现</h4>
 <div class="org-src-container">
 
 <pre><code class="java" >public void discover(final ClassResourceEnumerator classResourceEnumerator, GIConfig config) throws IOException {
@@ -772,8 +773,8 @@ visitInsn - 在 PassthroughDataflowMethodVisitor 中处理返回指令，记录�
 </div>
 
 </section>
-<section id="slide-org2ad0f3c">
-<h4 id="org2ad0f3c">ModelGeneratorMethodVisitor</h4>
+<section id="slide-orgc78e157">
+<h4 id="orgc78e157">ModelGeneratorMethodVisitor</h4>
 <p>
 继承 TaintTrackingMethodVisitor&lt;String&gt;，实现了以下方法：
 </p>
@@ -796,8 +797,8 @@ visitFieldInsn：和之前的流程差不多，但是会记录被污染的属性
 </ul>
 
 </section>
-<section id="slide-orgeedd7f2">
-<h4 id="orgeedd7f2">&nbsp;</h4>
+<section id="slide-org92cb9bf">
+<h4 id="org92cb9bf">&nbsp;</h4>
 <p>
 visitMethodInsn - 分析外层方法参数和当前方法参数的关系，构建 GraphCall 实例
 </p>
@@ -844,8 +845,8 @@ visitMethodInsn - 分析外层方法参数和当前方法参数的关系，构�
 </div>
 
 </section>
-<section id="slide-org93e7211">
-<h3 id="org93e7211">SourceDiscovery</h3>
+<section id="slide-org08a1c2f">
+<h3 id="org08a1c2f">SourceDiscovery</h3>
 <p>
 这是一个抽象类，根据不同实现来选择污染源，比如在默认配置中会将 finalize、readObject、hashCode 等方法视为 source，主要取决于已知利用链
 </p>
@@ -872,8 +873,8 @@ visitMethodInsn - 分析外层方法参数和当前方法参数的关系，构�
 </div>
 
 </section>
-<section id="slide-org670bdf8">
-<h3 id="org670bdf8">GadgetChainDiscovery</h3>
+<section id="slide-org3133ff7">
+<h3 id="org3133ff7">GadgetChainDiscovery</h3>
 <p>
 根据已有的数据挖掘利用链
 </p>
@@ -885,8 +886,8 @@ visitMethodInsn - 分析外层方法参数和当前方法参数的关系，构�
 </ol>
 
 </section>
-<section id="slide-org314de98" data-auto-animate>
-<h4 id="org314de98">&nbsp;</h4>
+<section id="slide-orge06d0b8" data-auto-animate>
+<h4 id="orge06d0b8">&nbsp;</h4>
 <div class="org-src-container">
 
 <pre><code class="java" data-line-numbers="" data-org-id="code-animation">public class GadgetChainDiscovery {
@@ -917,8 +918,8 @@ visitMethodInsn - 分析外层方法参数和当前方法参数的关系，构�
 </div>
 
 </section>
-<section id="slide-org539d7ca" data-auto-animate>
-<h4 id="org539d7ca">&nbsp;</h4>
+<section id="slide-org55cd80f" data-auto-animate>
+<h4 id="org55cd80f">&nbsp;</h4>
 <div class="org-src-container">
 
 <pre><code class="java" data-line-numbers="|13|16" data-org-id="code-animation">public class GadgetChainDiscovery {
@@ -959,8 +960,8 @@ visitMethodInsn - 分析外层方法参数和当前方法参数的关系，构�
 </div>
 
 </section>
-<section id="slide-orgd50e5c6" data-auto-animate>
-<h4 id="orgd50e5c6">&nbsp;</h4>
+<section id="slide-org5ed53ea" data-auto-animate>
+<h4 id="org5ed53ea">&nbsp;</h4>
 <div class="org-src-container">
 
 <pre><code class="java" data-line-numbers="|9,10|13,14|17,18" data-org-id="code-animation">public class GadgetChainDiscovery {
@@ -990,8 +991,8 @@ visitMethodInsn - 分析外层方法参数和当前方法参数的关系，构�
 </div>
 
 </section>
-<section id="slide-org3c599d7">
-<h4 id="org3c599d7">输出格式</h4>
+<section id="slide-orgdb07d1b">
+<h4 id="orgdb07d1b">输出格式</h4>
 <div class="org-src-container">
 
 <pre><code class="text" >net/sf/jasperreports/charts/design/JRDesignPieDataset.readObject(Ljava/io/ObjectInputStream;)V (1)
@@ -1006,10 +1007,10 @@ visitMethodInsn - 分析外层方法参数和当前方法参数的关系，构�
 </section>
 </section>
 <section>
-<section id="slide-org6557cd4">
-<h2 id="org6557cd4">&nbsp;</h2>
+<section id="slide-org23154ba">
+<h2 id="org23154ba">&nbsp;</h2>
 
-<div id="org473ece5" class="figure">
+<div id="org23a414f" class="figure">
 <p><img src="img/Thank-you-pinned-note.svg" alt="Thank-you-pinned-note.svg" class="org-svg" width="500" />
 </p>
 </div>
