@@ -1,0 +1,255 @@
+#+title: Kerberos Security
+#+author: 曾润铨
+
+#+REVEAL_ROOT: ../reveal.js
+#+OPTIONS: toc:nil num:nil reveal_slide_number:nil
+#+REVEAL_MIN_SCALE: 0.2
+#+REVEAL_MAX_SCALE: 2.0
+#+REVEAL_TRANS: slide
+#+REVEAL_EXTRA_CSS: style.css
+#+REVEAL_EXTRA_SCRIPTS: ("../script.js")
+#+REVEAL_PLUGINS: (zoom notes highlight)
+
+
+* Kerberos 协议
+Kerberos 是由 MIT 研发的一种网络身份验证协议，用来在非安全网络中，对个人通信以安
+全的手段进行身份认证
+
+#+begin_notes
+认证过程的实现不依赖于主机操作系统的认证，无需基于主机地址的信任，不要求网络上所
+有主机的物理安全，并假定传送的数据包可以被任意地修改
+
+Windows 2000 和后续的操作系统使用 Kerberos 为其默认认证方法
+#+end_notes
+
+** \nbsp
+三种主要角色：
+1. 访问服务的 Client/User
+2. 提供服务的 Server
+3. 密钥分发中心 KDC
+   - Authentication Service
+   - Ticket Granting Service
+
+* 认证流程
+#+attr_org: :width 600px
+[[file:img/20230226-101913screenshot.png]]
+
+** \nbsp
++ AS-REQ：Client 使用 hash 加密当前时间戳，发送给 KDC
+
++ AS-REP：KDC 若解密成功并且时间戳与当前事件差值小于五分钟，即通过 hash 确认用户
+  身份，则并返回一个短期会话密钥和 TGT
+
+#+begin_notes
+- TGS 会话密钥用于后续 Client 和 TGS 的加密通信，使用 Client hash 加密
+- 票据授予票据（Ticket Granting Ticket），包含用户信息、域名、有效期和 PAC 等
+- Kerberos 协议是无状态的，TGS 所需的全部信息都在 TGT 中
+- TGT 经 krbtgt-hash 加密，得到 krbtgt-hash 就可以任意伪造 TGT（黄金票据）
+#+end_notes
+
+** \nbsp
++ TGS-REQ：Client 使用会话密钥构建访问特定服务的请求，连同 TGT 一起发送到 KDC
+
++ TGS-REP：KDC 使用 krbtgt-hash 解密 TGT 和服务请求，然后如果请求被允许，则返回
+  一个服务票据（Service Ticket）。ST 包括两部分：
+
+  - Server 部分：包含请求用户的 PAC、时间戳、TGT 有效期、会话密钥等
+
+    #+begin_notes
+    - 会话密钥用于客户端和服务提供者进行加密通信
+    - 使用 Server 和 KDC 共享的长期密钥加密这部分消息
+    #+end_notes
+
+  - Client 部分：Client/Server 会话密钥
+
+    #+begin_notes
+    使用 AS-REP 中得到的短期会话密钥加密这部分消息
+    #+end_notes
+
+** \nbsp
++ AP-REQ：Client 把 ST 中 Server 部分和请求一起发送到远程服务器（通过会话密钥加密）
+
++ AP-REP：Server 用自己的 Master Key 解密请求，获得 PAC 和会话密钥，返回一个加密
+  的时间戳示意验证完成
+
+  - PAC：Server 用 PAC 向 KDC 确认该用户是否有权限访问请求的资源（可选）
+
+* Pass The Hash
+由于认证过程中是通过用户 hash 确认身份的，所以拿到 hash 我们就相当于拥有了该用户
+的身份，而不需要知道明文密码
+
+#+attr_org: :width 400px
+[[file:img/20230227-131512screenshot.png]]
+
+#+begin_notes
+get ntlm-hash：
+- privilege::debug
+- token::elevate
+- lsadump::sam
+
+getshell：
+- sekurlsa::pth /user:Administrator /domain:whoamianony.org /ntlm:31d6cfe0d16ae931b73c59d7e0c089c0
+#+end_notes
+
+* 用户名枚举/密码喷洒
+通过不同的错误码可以判断是用户名错误还是密码错误，利用这个特性可以对用户名、密码
+进行猜解。为了避免用户被锁定，通常使用密码喷洒攻击（用固定密码登录多个用户）
+
+** \nbsp
+#+attr_org: :width 600px
+[[file:img/20230226-163957screenshot.png]]
+
+** \nbsp
+#+attr_org: :width 600px
+[[file:img/20230226-163845screenshot.png]]
+
+* AS-REP Roasting
+如果用户设置了“不要求 Kerberos 预身份验证”，则可以发送 AS-REQ 请求来获取会话密钥，
+然后通过离线爆破得到用户 hash
+
+#+ATTR_HTML: :width 400
+[[file:img/20230226-165830screenshot.png]]
+
+#+begin_notes
+.\Rubeus.exe asreproast
+#+end_notes
+
+* 黄金票据
+金票（Golden Ticket）是通过 krbtgt-hash 伪造的 TGT。只要有了高权限的 TGT，就可以发
+送给 TGS 换取任意服务的 ST，可以说有了金票就有了域内的最高权限
+
+#+attr_html: :width 600px
+[[file:img/20230227-103109screenshot.png]]
+
+** \nbsp
+制作金票的条件：
+- 域名称
+- 域的 SID 值（域用户 SID 删除最后一节）
+- 域的 krbtgt 账户密码 hash
+- 伪造的任意用户名
+
+#+begin_notes
+PC2(Administrator):
+- privilege::debug
+- lsadump::dcsync /domain:whoamianony.org /user:krbtgt
+- krbtgt-hash: 6be58bfcc0a164af2408d1d3bd313c2a
+- kerberos::purge
+- klist purge
+- kerberos::golden /user:hacker /domain:whoamianony.com /sid:S-1-5-21-1315137663-3706837544-1429009142 /krbtgt:6be58bfcc0a164af2408d1d3bd313c2a /ticket:ticket.kirbi
+#+end_notes
+
+* Pass The Ticket
+Kerbreos 除了 AS_ERQ 是使用用户 hash 加密时间戳进行验证之外，其他步骤的验证都是通过
+票据（TGT/ST)。因为票据里面的内容主要是 session key 和 ticket，拿到票据之后即可以用
+凭票进行下阶段的验证
+
+#+attr_html: :width 600px
+[[file:img/20230227-132316screenshot.png]]
+
+#+begin_notes
+金票和银票的利用就是通过 PTT 传递伪造的票据来进行操作
+#+end_notes
+
+* Kerberoasting
+TGS-REP 中 ticket 的加密内容（enc_part）是使用服务和 DC 共享的 hash 进行加密的，
+所以攻击者获取 ST 后可以离线破解得到服务 hash
+
+同理也可以通过 AS-REP 离线破解 krbtgt-hash, 但由于 krbtgt-hash 是随机生成的，只
+存在理论可能性
+
+#+attr_org: :width 400px
+[[file:img/20230227-142441screenshot.png]]
+
+#+begin_notes
+.\Rubeus.exe kerberoast
+原理在于先用 LDAP 查询域内的 spn，再发送 TGS 包获取服务 hash
+#+end_notes
+
+* 白银票据
+银票（Silver Tickets）是伪造的 ST（Service Ticket），因为在 PAC 里通过 SID 限定了给
+Client 授权的服务，所以银票只能访问指定服务。由于伪造的 PAC 不带有有效的 KDC 签
+名，如果服务主机配置了“验证 KDC PAC 签名”则银票失效
+
+#+attr_html: :width 600px
+[[file:img/20230227-102332screenshot.png]]
+
+** \nbsp
+制作银票的条件：
+- 域名
+- 域 SID
+- 目标服务器名
+- 可利用服务
+- 服务帐号的 ntlm-hash
+- 伪造的用户名
+
+#+begin_notes
+- kerberos::purge
+- klist purge
+- kerberos::golden /domain:whoamianony.com /sid:S-1-5-21-1315137663-3706837544-1429009142 /target:DC.whoamianony.org /service:cifs /rc4:3e6a3d8c713b4821eaa51aab25f52074 /user:xxx /ptt
+#+end_notes
+
+* 委派攻击
+** 非约束委派
+在非约束性委派中，服务账号可以获取域用户的 TGT，并使用该 TGT 模拟域用户访问任意
+服务。配置了非约束性委派的账户的 userAccountControl 属性会设置
+~TRUSTED_FOR_DELEGATION~ 标志位
+
+** \nbsp
+#+attr_html: :width 400px
+[[file:img/20230227-110454screenshot.png]]
+
+** \nbsp
+#+attr_html: :width 500px
+[[file:img/20230227-112812screenshot.png]]
+
+*** 场景
+如果我们找到配置了非约束的委派的帐户，比如 PC1$，并且通过一定手段拿下该帐户的权限，
+然后诱导域管访问该 PC1$，这个时候域管会将自己的 TGT 发送到 PC1$ 并缓存到 LSASS 中，那
+攻击者就可以从 LSASS 中导出域管的 TGT，然后通过 PTT 使用域管权限
+
+** 约束委派
+微软为 Kerberos 协议的 TGS-REQ 和 TGS-REP 阶段引入了两个扩展协议
+S4u2self（Service for User to Self）和 S4U2proxy（Service for User to Proxy）
+
+#+begin_notes
+S4U2self 扩展允许服务代表用户获取针对自己的服务票据，S4U2proxy 允许服务代表用户
+获取另一个服务的服务票据。约束委派就是限制了 S4U2proxy 扩展的请求范围，使得配置
+了委派属性的服务只能模拟用户身份访问特定的其他服务。配置了约束性委派的账户的
+userAccountControl 属性会设置 TRUSTED_TO_AUTH_FOR_DELEGATION 标志位，并且账户的
+msDS-AllowedToDelegateTo 属性会被设置为对哪些服务进行委派
+#+end_notes
+
+** \nbsp
+#+attr_html: :width 500px
+[[file:img/20230227-110518screenshot.png]]
+
+** \nbsp
+#+attr_html: :width 500px
+[[file:img/20230227-112746screenshot.png]]
+
+*** 场景
+如果 Service 1 受到威胁，由于 Service 1 配置了到 Service 2 的约束性委派，则攻击
+者可以利用 Service 1 代表域管理员用户访问 Service 2。如果 Service 2 位于域控制器，
+例如域控的 CIFS、LDAP 等服务，那么就可以直接获取域控制器权限
+
+#+begin_notes
+整个过程中，Service 1 无法获取用户的 TGT，因此需要通过构造 S4U 请求，以任意用户
+的权限申请访问某服务的 ST。但是在申请 ST 之前，机器账户或服务账户必须先申请到自
+己的 TGT，这就意味着需要获取机器账户或服务账户的哈希值或明文密码
+#+end_notes
+
+* PAC
+#+ATTR_HTML: :width 350
+[[file:img/20230227-113620screenshot.png]]
+
+** MS14-068
+签名原本的设计是要用到 HMAC 系列的 checksum 算法，也就是必须要有 key(krbtgt-hash)的参
+与。但由于其实现的问题，导致用户可以指定任意签名算法，KDC 服务器就会使用指定的算
+法进行签名验证。因此可以利用不需要相关密钥的算法如 MD5，实现 PAC 内容的任意更改
+
+#+attr_org: :width 600px
+[[file:img/20230227-115737screenshot.png]]
+
+* \nbsp
+#+ATTR_HTML: :width 500
+[[file:img/Thank-you-pinned-note.svg]]
